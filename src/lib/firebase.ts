@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
-import { initializeFirestore, persistentLocalCache, type Firestore } from "firebase/firestore";
+import { initializeFirestore, persistentLocalCache, type Firestore, getFirestore } from "firebase/firestore";
 import { getAnalytics, type Analytics } from "firebase/analytics";
 
 const firebaseConfig = {
