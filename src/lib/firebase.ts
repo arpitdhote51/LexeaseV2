@@ -4,7 +4,7 @@ import { initializeFirestore, persistentLocalCache, type Firestore, getFirestore
 import { getAnalytics, type Analytics } from "firebase/analytics";
 
 const firebaseConfig = {
-    apiKey: "YOUR_FIREBASE_API_KEY",
+    apiKey: "AIzaSyDhXH5v9VknuSLZclH4NmQcL6ZZMNNTic0",
     authDomain: "studio-7376954909-7abc4.firebaseapp.com",
     projectId: "studio-7376954909-7abc4",
     storageBucket: "studio-7376954909-7abc4.appspot.com",
