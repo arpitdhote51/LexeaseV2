@@ -11,6 +11,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import {googleAI} from '@genkit-ai/googleai';
 
 const GeneralLegalQAInputSchema = z.object({
   question: z.string().describe('The user question about a legal topic.'),
@@ -36,6 +37,7 @@ const prompt = ai.definePrompt({
   name: 'generalLegalQAPrompt',
   input: {schema: GeneralLegalQAInputSchema},
   output: {schema: GeneralLegalQAOutputSchema},
+  model: googleAI.model('gemini-2.5-flash'),
   prompt: `You are "Lexy," a highly capable AI legal assistant designed for Indian legal professionals.
 
 You must adhere to the following capabilities and standards:
@@ -72,4 +74,3 @@ const generalLegalQAFlow = ai.defineFlow(
     return output!;
   }
 );
-

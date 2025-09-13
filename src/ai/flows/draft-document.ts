@@ -11,6 +11,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import { Storage } from '@google-cloud/storage';
+import {googleAI} from '@genkit-ai/googleai';
 
 const DraftDocumentInputSchema = z.object({
   documentType: z.string().describe('The type of legal document to draft (e.g., "Simple Affidavit").'),
@@ -77,6 +78,7 @@ const draftingAgentPrompt = ai.definePrompt({
     name: 'draftingAgentPrompt',
     tools: [findRelevantTemplates],
     output: { schema: DraftDocumentOutputSchema },
+    model: googleAI.model('gemini-2.5-flash'),
     prompt: `
         You are an expert legal drafting assistant.
         Your task is to generate a formal legal document based on user-provided details.

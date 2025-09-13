@@ -10,6 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import {googleAI} from '@genkit-ai/googleai';
 
 const RiskFlaggingInputSchema = z.object({
   documentText: z.string().describe('The text of the document to analyze.'),
@@ -35,6 +36,7 @@ const riskFlaggingPrompt = ai.definePrompt({
   name: 'riskFlaggingPrompt',
   input: {schema: RiskFlaggingInputSchema},
   output: {schema: RiskFlaggingOutputSchema},
+  model: googleAI.model('gemini-2.5-flash'),
   prompt: `You are an AI legal assistant tasked with identifying potentially risky or unusual clauses in legal documents.
 
   Analyze the following legal text and identify any clauses that could be problematic, unusual, or create a potential risk for the user. Provide a list of the risky clauses.

@@ -10,6 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import {googleAI} from '@genkit-ai/googleai';
 
 const PlainLanguageSummarizationInputSchema = z.object({
   documentText: z.string().describe('The text of the document to summarize.'),
@@ -42,6 +43,7 @@ const prompt = ai.definePrompt({
   name: 'plainLanguageSummarizationPrompt',
   input: {schema: PlainLanguageSummarizationInputSchema},
   output: {schema: PlainLanguageSummarizationOutputSchema},
+  model: googleAI.model('gemini-2.5-flash'),
   prompt: `You are an AI assistant who specializes in simplifying complex legal documents.
 
   Summarize the following legal document into plain, easy-to-understand language tailored to the user's role.
