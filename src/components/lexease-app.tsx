@@ -8,8 +8,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import pdfjs from "pdfjs-dist/build/pdf";
+import "pdfjs-dist/build/pdf.worker.entry";
+import mammoth from "mammoth";
 
-import { parseDocument } from "@/ai/flows/parse-document";
+
 import {
   plainLanguageSummarization,
   PlainLanguageSummarizationInput,
@@ -105,16 +108,32 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
     try {
         const reader = new FileReader();
         reader.onload = async (e) => {
-            const fileDataUri = e.target?.result as string;
+            const arrayBuffer = e.target?.result as ArrayBuffer;
+            let extractedText = '';
+
             try {
-                const { documentText: extractedText } = await parseDocument({ fileDataUri });
+                 if (fileToProcess.type === 'application/pdf') {
+                    const pdfDoc = await pdfjs.getDocument({data: arrayBuffer}).promise;
+                    let text = '';
+                    for (let i = 1; i <= pdfDoc.numPages; i++) {
+                        const page = await pdfDoc.getPage(i);
+                        const content = await page.getTextContent();
+                        text += content.items.map((item: any) => item.str).join(' ');
+                    }
+                    extractedText = text;
+                } else if (fileToProcess.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+                    const result = await mammoth.extractRawText({ arrayBuffer });
+                    extractedText = result.value;
+                } else if (fileToProcess.type === 'text/plain') {
+                    extractedText = new TextDecoder().decode(arrayBuffer);
+                }
                 setDocumentText(extractedText);
-            } catch (serverError) {
-                 console.error('Server-side parsing error:', serverError);
+            } catch (parsingError) {
+                 console.error('Client-side parsing error:', parsingError);
                  toast({
                     variant: 'destructive',
                     title: 'Parsing Error',
-                    description: 'The server could not process your file.',
+                    description: 'Could not read the content of your file.',
                 });
                 setFile(null);
             } finally {
@@ -130,7 +149,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
             });
             setIsParsing(false);
         };
-        reader.readAsDataURL(fileToProcess);
+        reader.readAsArrayBuffer(fileToProcess);
     } catch (error) {
         console.error('File processing error:', error);
         toast({
