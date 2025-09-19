@@ -41,9 +41,12 @@ export default function QAChat({ documentText, documentId }: QAChatProps) {
 
   const scrollToBottom = useCallback(() => {
     if (scrollAreaRef.current) {
-        setTimeout(() => {
-            scrollAreaRef.current!.scrollTo({ top: scrollAreaRef.current!.scrollHeight, behavior: 'smooth' });
-        }, 100);
+        const viewport = scrollAreaRef.current.querySelector('div[data-radix-scroll-area-viewport]');
+        if (viewport) {
+          setTimeout(() => {
+              viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
+          }, 100);
+        }
     }
   }, []);
 
@@ -52,28 +55,28 @@ export default function QAChat({ documentText, documentId }: QAChatProps) {
     // If you re-enable auth, this will work for persisted documents.
     if (!documentId || documentId === 'temp-id') return;
 
-    const messagesCol = collection(db, "documents", documentId, "messages");
-    const q = query(messagesCol, orderBy("timestamp", "asc"));
+    // const messagesCol = collection(db, "documents", documentId, "messages");
+    // const q = query(messagesCol, orderBy("timestamp", "asc"));
     
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const history: Message[] = [];
-       querySnapshot.forEach((doc) => {
-         history.push({ id: doc.id, ...doc.data() } as Message);
-       });
-      setMessages(history);
-      scrollToBottom();
-    }, (error) => {
-      console.error("Error fetching chat history: ", error);
-      if (error.code !== 'failed-precondition') {
-          toast({
-              variant: "destructive",
-              title: "Error",
-              description: "Could not load chat history."
-          });
-      }
-    });
+    // const unsubscribe = onSnapshot(q, (querySnapshot) => {
+    //   const history: Message[] = [];
+    //    querySnapshot.forEach((doc) => {
+    //      history.push({ id: doc.id, ...doc.data() } as Message);
+    //    });
+    //   setMessages(history);
+    //   scrollToBottom();
+    // }, (error) => {
+    //   console.error("Error fetching chat history: ", error);
+    //   if (error.code !== 'failed-precondition') {
+    //       toast({
+    //           variant: "destructive",
+    //           title: "Error",
+    //           description: "Could not load chat history."
+    //       });
+    //   }
+    // });
 
-    return () => unsubscribe();
+    // return () => unsubscribe();
   }, [documentId, scrollToBottom, toast]);
 
 
@@ -108,8 +111,6 @@ export default function QAChat({ documentText, documentId }: QAChatProps) {
   const startRecognition = () => {
     if (recognitionRef.current) {
         recognitionRef.current.stop();
-        setIsRecognizing(false);
-        recognitionRef.current = null;
         return;
     }
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -183,7 +184,7 @@ export default function QAChat({ documentText, documentId }: QAChatProps) {
       <CardHeader>
         <CardTitle className="font-bold text-lg text-foreground">Interactive Q&amp;A</CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col gap-4">
+      <CardContent className="flex-1 flex flex-col gap-4 overflow-hidden">
         <ScrollArea className="flex-1 pr-4 -mr-4" ref={scrollAreaRef}>
           <div className="space-y-4">
             {messages.map((message, index) => (
@@ -239,23 +240,27 @@ export default function QAChat({ documentText, documentId }: QAChatProps) {
             )}
           </div>
         </ScrollArea>
-        <form onSubmit={handleSubmit} className="flex gap-2">
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask a question about the document..."
-            disabled={isLoading || !documentText}
-            className="text-base"
-          />
-          <Button type="button" variant={isRecognizing ? "destructive" : "outline"} size="icon" onClick={startRecognition} disabled={isLoading}>
-              <Mic className="h-4 w-4" />
-          </Button>
-          <Button type="submit" disabled={isLoading || !input.trim()} className="bg-accent hover:bg-accent/90">
-            <Send className="h-4 w-4" />
-          </Button>
-        </form>
+        <div className="border-t pt-4">
+            <form onSubmit={handleSubmit} className="flex gap-2">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask a question about the document..."
+                disabled={isLoading || !documentText}
+                className="text-base"
+              />
+              <Button type="button" variant={isRecognizing ? "destructive" : "outline"} size="icon" onClick={startRecognition} disabled={isLoading}>
+                  <Mic className="h-4 w-4" />
+              </Button>
+              <Button type="submit" disabled={isLoading || !input.trim()} className="bg-accent hover:bg-accent/90">
+                <Send className="h-4 w-4" />
+              </Button>
+            </form>
+        </div>
          <audio ref={audioRef} className="hidden" />
       </CardContent>
     </Card>
   );
 }
+
+    

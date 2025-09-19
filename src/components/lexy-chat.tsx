@@ -45,7 +45,6 @@ export default function LexyChat() {
         id: "welcome-msg",
     };
 
-    // Only process initialPrompt if we are on the /lexy page
     if (initialPrompt && !isHomePage && messages.length === 0) {
       const userMessage: Message = { role: 'user', content: initialPrompt, id: `user-${Date.now()}` };
       const initialMessages = [welcomeMessage, userMessage];
@@ -54,8 +53,7 @@ export default function LexyChat() {
     } else if (messages.length === 0) {
       setMessages([welcomeMessage]);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialPrompt, isHomePage]);
+  }, [initialPrompt, isHomePage, messages.length]);
 
   const scrollToBottom = useCallback(() => {
     const viewport = scrollAreaRef.current?.querySelector('div[data-radix-scroll-area-viewport]');
@@ -79,7 +77,6 @@ export default function LexyChat() {
     } catch (error) {
         console.error("General Q&A failed:", error);
         toast({ variant: "destructive", title: "Error", description: "Could not get an answer. Please try again." });
-        // Don't remove the user message on error, so they can retry.
     } finally {
         setIsLoading(false);
     }
@@ -132,6 +129,7 @@ export default function LexyChat() {
         recognitionRef.current.stop();
         return;
     }
+    
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
         toast({ variant: 'destructive', title: 'Speech recognition not supported' });
@@ -171,7 +169,6 @@ export default function LexyChat() {
     recognition.start();
     recognitionRef.current = recognition;
   };
-
 
   return (
     <div className={`w-full flex flex-col bg-white/50 shadow-lg rounded-2xl border border-border/50 backdrop-blur-sm h-full`}>
@@ -251,3 +248,5 @@ export default function LexyChat() {
     </div>
   );
 }
+
+    
