@@ -4,32 +4,16 @@ import {
   createContext,
   useContext,
   useState,
-  useEffect,
   ReactNode,
 } from "react";
-import {
-  User,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  sendEmailVerification,
-  signOut as firebaseSignOut,
-  sendPasswordResetEmail,
-} from "firebase/auth";
-import { auth, db } from "@/lib/firebase";
-import { doc, setDoc } from "firebase/firestore";
-import { useToast } from "@/hooks/use-toast";
+import type { User } from "firebase/auth";
 
-export interface AuthFormValues {
-  email: string;
-  password?: string;
-}
-
+// Define a simplified AuthContextType for a guest-only experience.
 interface AuthContextType {
-  user: User | null;
-  loading: boolean;
-  signIn: (data: AuthFormValues) => Promise<void>;
-  signUp: (data: AuthFormValues) => Promise<void>;
+  user: User | null; // Always null for guest mode
+  loading: boolean; // Always false as we are not performing an async auth check
+  signIn: (data: any) => Promise<void>;
+  signUp: (data: any) => Promise<void>;
   signOut: () => Promise<void>;
   sendPasswordReset: (email: string) => Promise<void>;
   resendVerificationEmail: (email: string, password: string) => Promise<void>;
@@ -37,134 +21,24 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// A "no-op" function that does nothing, to be used for auth functions.
+const noOpPromise = () => Promise.resolve();
+const noOpPromiseWithMessage = () => {
+    console.warn("Authentication is disabled in this application version.");
+    return Promise.resolve();
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
-
-  useEffect(() => {
-    // This check is to prevent Firebase from trying to initialize on the server.
-    if (typeof window !== 'undefined') {
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
-        setUser(user);
-        setLoading(false);
-      });
-      return () => unsubscribe();
-    } else {
-        setLoading(false);
-    }
-  }, []);
-
-  const signIn = async (data: AuthFormValues) => {
-    if (!data.password) return;
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
-      if (!userCredential.user.emailVerified) {
-        await firebaseSignOut(auth);
-        toast({
-            variant: "destructive",
-            title: "Email not verified",
-            description: "Please check your inbox or resend the verification email.",
-        });
-        const error: any = new Error("Email not verified");
-        error.code = "auth/user-not-verified";
-        throw error;
-      }
-    } catch (error: any) {
-       if (error.code !== "auth/user-not-verified") {
-            toast({
-                variant: "destructive",
-                title: "Sign in failed",
-                description: error.message,
-            });
-       }
-      throw error;
-    }
-  };
-
-  const signUp = async (data: AuthFormValues) => {
-    if (!data.password) return;
-    try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        data.email,
-        data.password
-      );
-      const newUser = userCredential.user;
-      
-      // Don't await these promises on the client
-      sendEmailVerification(newUser);
-      setDoc(doc(db, "users", newUser.uid), {
-        email: newUser.email,
-        createdAt: new Date(),
-      });
-
-      await firebaseSignOut(auth); // Sign out user until they are verified
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Sign up failed",
-        description: error.message,
-      });
-      throw error;
-    }
-  };
-
-  const signOut = async () => {
-    try {
-      await firebaseSignOut(auth);
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Sign out failed",
-        description: error.message,
-      });
-    }
-  };
-
-  const sendPasswordReset = async (email: string) => {
-    try {
-      await sendPasswordResetEmail(auth, email);
-      toast({
-        title: "Password Reset Email Sent",
-        description: "Check your inbox to reset your password.",
-      });
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Password Reset Failed",
-        description: error.message,
-      });
-    }
-  };
   
-  const resendVerificationEmail = async (email: string, password: string) => {
-    try {
-      // To resend, we need to temporarily sign the user in
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      await sendEmailVerification(userCredential.user);
-      await firebaseSignOut(auth);
-      toast({
-        title: "Verification Email Sent",
-        description: "Please check your inbox and verify your email address.",
-      });
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Failed to Resend Email",
-        description: "Could not resend verification email. Please check your credentials.",
-      });
-    }
-  };
-
+  // In guest-only mode, the user is always null and loading is always false.
   const value = {
-    user,
-    loading,
-    signIn,
-    signUp,
-    signOut,
-    sendPasswordReset,
-    resendVerificationEmail
+    user: null,
+    loading: false,
+    signIn: noOpPromiseWithMessage,
+    signUp: noOpPromiseWithMessage,
+    signOut: noOpPromise,
+    sendPasswordReset: noOpPromiseWithMessage,
+    resendVerificationEmail: noOpPromiseWithMessage
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

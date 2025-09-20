@@ -1,24 +1,16 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
-import { useAuth } from "@/hooks/use-auth";
-import { db } from "@/lib/firebase";
-import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { type DocumentData } from "@/lib/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "../ui/separator";
+import { usePathname } from "next/navigation";
+
 
 export default function ChatHistorySidebar() {
-  const { user, signOut } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const [documents, setDocuments] = useState<DocumentData[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleNewAnalysis = () => {
     router.push("/new");
