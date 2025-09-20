@@ -12,21 +12,9 @@ import type { User } from "firebase/auth";
 interface AuthContextType {
   user: User | null; // Always null for guest mode
   loading: boolean; // Always false as we are not performing an async auth check
-  signIn: (data: any) => Promise<void>;
-  signUp: (data: any) => Promise<void>;
-  signOut: () => Promise<void>;
-  sendPasswordReset: (email: string) => Promise<void>;
-  resendVerificationEmail: (email: string, password: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// A "no-op" function that does nothing, to be used for auth functions.
-const noOpPromise = () => Promise.resolve();
-const noOpPromiseWithMessage = () => {
-    console.warn("Authentication is disabled in this application version.");
-    return Promise.resolve();
-};
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   
@@ -34,11 +22,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value = {
     user: null,
     loading: false,
-    signIn: noOpPromiseWithMessage,
-    signUp: noOpPromiseWithMessage,
-    signOut: noOpPromise,
-    sendPasswordReset: noOpPromiseWithMessage,
-    resendVerificationEmail: noOpPromiseWithMessage
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
