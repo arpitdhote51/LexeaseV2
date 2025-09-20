@@ -96,6 +96,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
   };
 
   const processFile = async (fileToProcess: File) => {
+    setFile(fileToProcess);
     setIsParsing(true);
     setDocumentText('');
     setAnalysisResult(null);
@@ -186,7 +187,6 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
     if(existingDocument || isLoading || isParsing) return;
     const files = event.dataTransfer.files;
     if (files && files.length > 0) {
-      setFile(files[0]);
       processFile(files[0]);
     }
   }, [existingDocument, isLoading, isParsing]);
@@ -286,7 +286,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
                   </div>
                 </RadioGroup>
               </div>
-              <Button onClick={handleAnalyze} disabled={isLoading || isParsing || !file || !!analysisResult} className="w-full bg-accent text-white font-semibold py-3 rounded-lg hover:bg-accent/90">
+              <Button onClick={handleAnalyze} disabled={isLoading || isParsing || !file || !!analysisResult || !documentText} className="w-full bg-accent text-white font-semibold py-3 rounded-lg hover:bg-accent/90">
                 {isLoading && !analysisResult ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
