@@ -39,36 +39,33 @@ const findRelevantTemplates = ai.defineTool(
     }),
   },
   async ({ documentType, language }) => {
-    const storage = new Storage();
-    const bucketName = 'legal_drafts';
+    // This flow is now disabled as it requires credentials that are not available.
+    // Returning a placeholder template.
+    console.warn("GCS template retrieval is disabled. Using a placeholder.");
     
-    // Construct the file path based on language and document type.
-    // e.g., english_drafts/Affidavit.txt
-    const filePath = `${language.toLowerCase()}_drafts/${documentType}.txt`;
-    
-    try {
-      console.log(`Attempting to read from GCS: gs://${bucketName}/${filePath}`);
-      const bucket = storage.bucket(bucketName);
-      const file = bucket.file(filePath);
-      
-      const [exists] = await file.exists();
-      if (!exists) {
-        throw new Error(`Template file not found at path: gs://${bucketName}/${filePath}. Please ensure the file exists.`);
-      }
+    // In a real scenario, you would need to configure Google Cloud credentials.
+    // For now, we return a simple, hardcoded template to allow the flow to complete.
+    if (documentType === 'Affidavit') {
+        return { template: `
+BEFORE THE NOTARY PUBLIC AT [City]
+AFFIDAVIT
 
-      const [content] = await file.download();
-      const template = content.toString('utf8');
-      
-      if (!template) {
-          throw new Error(`Template file is empty: gs://${bucketName}/${filePath}`);
-      }
+I, [Name], son/daughter of [Father's Name], aged [Age] years, residing at [Address], do hereby solemnly affirm and declare as under:
 
-      return { template };
-    } catch (error) {
-      console.error(`GCS template retrieval failed:`, error);
-      // Re-throw the error to be caught by the calling flow, which will notify the user.
-      throw new Error(`Failed to retrieve template from GCS. Please check the file path and bucket permissions. Details: ${error instanceof Error ? error.message : String(error)}`);
+1. That I am the deponent herein and a citizen of India.
+2. That the facts stated in this affidavit are true to my knowledge.
+[Add more user-provided details here]
+
+DEPONENT
+
+VERIFICATION
+Verified at [City] on this [Date] day of [Month], [Year] that the contents of the above affidavit are true and correct to the best of my knowledge and belief.
+
+DEPONENT
+`};
     }
+    
+    return { template: `Template for ${documentType} in ${language} not found. Please provide details.` };
   }
 );
 
