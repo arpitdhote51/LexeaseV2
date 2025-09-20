@@ -1,23 +1,25 @@
+
 'use server';
 
 /**
- * @fileOverview A server-side flow for parsing document files from Google Cloud Storage.
+ * @fileOverview A server-side flow for parsing document files (PDF, DOCX, TXT).
  *
- * - parseDocument - A function that handles parsing the file content from a GCS path.
+ * - parseDocument - A function that handles parsing the file content.
  * - ParseDocumentInput - The input type for the parseDocument function.
  * - ParseDocumentOutput - The return type for the parseDocument function.
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { Storage } from '@google-cloud/storage';
 import pdf from 'pdf-parse';
 import mammoth from 'mammoth';
 
 const ParseDocumentInputSchema = z.object({
-  gcsUrl: z
+  fileDataUri: z
     .string()
-    .describe("The GCS URL of the file to parse. Expected format: 'gs://<bucket-name>/<object-name>'."),
+    .describe(
+      "The file content as a data URI. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+    ),
 });
 export type ParseDocumentInput = z.infer<typeof ParseDocumentInputSchema>;
 
@@ -36,45 +38,33 @@ const parseDocumentFlow = ai.defineFlow(
     inputSchema: ParseDocumentInputSchema,
     outputSchema: ParseDocumentOutputSchema,
   },
-  async ({ gcsUrl }) => {
-    const urlParts = gcsUrl.replace('gs://', '').split('/');
-    const bucketName = urlParts.shift();
-    const objectName = urlParts.join('/');
-
-    if (!bucketName || !objectName) {
-      throw new Error('Invalid GCS URL format.');
+  async ({ fileDataUri }) => {
+    const match = fileDataUri.match(/^data:(.+);base64,(.+)$/);
+    if (!match) {
+      throw new Error('Invalid data URI format.');
     }
 
+    const mimeType = match[1];
+    const base64Data = match[2];
+    const buffer = Buffer.from(base64Data, 'base64');
+
     let documentText = '';
-    
+
     try {
-      const storage = new Storage();
-      const bucket = storage.bucket(bucketName);
-      const file = bucket.file(objectName);
-
-      const [metadata] = await file.getMetadata();
-      const mimeType = metadata.contentType;
-      
-      const [buffer] = await file.download();
-
-      if (mimeType === 'application/pdf') {
-          const data = await pdf(buffer);
-          documentText = data.text;
-      } else if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-          const result = await mammoth.extractRawText({ buffer });
-          documentText = result.value;
-      } else if (mimeType && mimeType.startsWith('text/')) {
-          documentText = buffer.toString('utf8');
-      } else {
-          throw new Error(`Unsupported file type: ${mimeType}`);
-      }
-      
-      // Clean up the uploaded file after parsing
-      await file.delete();
-
+        if (mimeType === 'application/pdf') {
+            const data = await pdf(buffer);
+            documentText = data.text;
+        } else if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+            const result = await mammoth.extractRawText({ buffer });
+            documentText = result.value;
+        } else if (mimeType === 'text/plain') {
+            documentText = buffer.toString('utf8');
+        } else {
+            throw new Error(`Unsupported file type: ${mimeType}`);
+        }
     } catch (error) {
-        console.error('Server-side parsing from GCS failed:', error);
-        throw new Error(`Failed to read or parse the document from storage. Details: ${error instanceof Error ? error.message : String(error)}`);
+        console.error('Server-side parsing failed:', error);
+        throw new Error(`Failed to parse the document on the server. Details: ${error instanceof Error ? error.message : String(error)}`);
     }
 
     return { documentText };

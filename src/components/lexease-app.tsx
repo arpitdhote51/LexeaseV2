@@ -24,8 +24,6 @@ import {
   RiskFlaggingOutput,
 } from "@/ai/flows/risk-flagging";
 import { parseDocument } from "@/ai/flows/parse-document";
-import { getUploadUrl } from "@/ai/flows/get-upload-url";
-
 
 import SummaryDisplay from "./summary-display";
 import EntitiesDisplay from "./entities-display";
@@ -40,6 +38,17 @@ type UserRole = "layperson" | "lawStudent" | "lawyer";
 interface LexeaseAppProps {
     existingDocument?: DocumentData | null;
 }
+
+const fileToDataUri = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            resolve(reader.result as string);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+};
 
 export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
   const [documentText, setDocumentText] = useState("");
@@ -104,25 +113,9 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
     }
 
     try {
-        // Step 1: Get a secure upload URL from the server
-        const { uploadUrl, gcsUrl } = await getUploadUrl({
-            fileName: fileToProcess.name,
-            contentType: fileToProcess.type,
-        });
-
-        // Step 2: Upload the file directly to GCS from the client
-        await fetch(uploadUrl, {
-            method: 'PUT',
-            body: fileToProcess,
-            headers: {
-                'Content-Type': fileToProcess.type,
-            },
-        });
-
-        // Step 3: Call the server to parse the file from GCS
-        const result = await parseDocument({ gcsUrl });
+        const fileDataUri = await fileToDataUri(fileToProcess);
+        const result = await parseDocument({ fileDataUri });
         setDocumentText(result.documentText);
-
     } catch (error) {
         console.error('File processing pipeline failed:', error);
         toast({
