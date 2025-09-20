@@ -34,6 +34,10 @@ import { Skeleton } from "./ui/skeleton";
 import type { DocumentData } from "@/lib/types";
 import Header from "./layout/header";
 
+// Set the workerSrc for pdf.js
+// This is the definitive fix to prevent "dynamically imported module" errors.
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+
 type UserRole = "layperson" | "lawStudent" | "lawyer";
 
 interface LexeaseAppProps {
@@ -54,12 +58,6 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
 
   const { toast } = useToast();
   
-  useEffect(() => {
-    // Set workerSrc for pdfjs-dist. This is crucial for it to work with Next.js
-    // Using a CDN is the most robust method.
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
-  }, []);
-
   useEffect(() => {
     if (existingDocument) {
       setDocumentText(existingDocument.documentDataUri); // Assuming documentDataUri is actually text for old data
@@ -131,7 +129,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
         toast({
             variant: 'destructive',
             title: 'File Read Error',
-            description: `Could not read the content of your document. ${error instanceof Error ? error.message : 'Please try again.'}`,
+            description: `Could not read the content of your document. Please try again.`,
         });
         setFile(null);
         setDocumentText('');
