@@ -9,8 +9,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit",
-    "postinstall": "patch-package"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@genkit-ai/googleai": "1.8.0",
@@ -47,7 +46,6 @@
     "lucide-react": "^0.475.0",
     "mammoth": "1.7.2",
     "next": "14.2.4",
-    "patch-package": "^8.0.0",
     "pdfjs-dist": "4.5.136",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
@@ -63,7 +61,6 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "@types/uuid": "^10.0.0",
     "@types/wav": "^1.0.4",
     "genkit-cli": "1.8.0",
     "postcss": "^8",
