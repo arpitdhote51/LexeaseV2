@@ -24,7 +24,6 @@ import {
   RiskFlaggingOutput,
 } from "@/ai/flows/risk-flagging";
 import { parseDocument } from "@/ai/flows/parse-document";
-import { GlobalWorkerOptions } from "pdfjs-dist";
 
 import SummaryDisplay from "./summary-display";
 import EntitiesDisplay from "./entities-display";
@@ -53,12 +52,6 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
   const [file, setFile] = useState<File | null>(null);
 
   const { toast } = useToast();
-
-  useEffect(() => {
-    // This is a workaround for Next.js build issues with pdfjs-dist.
-    // We manually specify the path to the worker script from a CDN.
-    GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.5.136/pdf.worker.min.mjs`;
-  }, []);
 
   useEffect(() => {
     if (existingDocument) {
