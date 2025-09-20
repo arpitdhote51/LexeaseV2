@@ -34,9 +34,6 @@ import { Skeleton } from "./ui/skeleton";
 import type { DocumentData } from "@/lib/types";
 import Header from "./layout/header";
 
-// Set up the worker for pdfjs
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
-
 type UserRole = "layperson" | "lawStudent" | "lawyer";
 
 interface LexeaseAppProps {
@@ -200,7 +197,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
     if (files && files.length > 0) {
       processFile(files[0]);
     }
-  }, [existingDocument, isLoading, isParsing, processFile]);
+  }, [existingDocument, isLoading, isParsing]);
 
   const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
