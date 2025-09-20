@@ -43,7 +43,6 @@ const prompt = ai.definePrompt({
   name: 'plainLanguageSummarizationPrompt',
   input: {schema: PlainLanguageSummarizationInputSchema},
   output: {schema: PlainLanguageSummarizationOutputSchema},
-  model: googleAI.model('gemini-2.5-flash'),
   prompt: `You are an AI assistant who specializes in simplifying complex legal documents.
 
   Summarize the following legal document into plain, easy-to-understand language tailored to the user's role.
@@ -64,7 +63,11 @@ const plainLanguageSummarizationFlow = ai.defineFlow(
     outputSchema: PlainLanguageSummarizationOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const {output} = await ai.generate({
+      prompt,
+      input,
+      model: 'gemini-2.5-flash',
+    });
     return output!;
   }
 );

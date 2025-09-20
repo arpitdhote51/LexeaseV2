@@ -78,7 +78,6 @@ const draftingAgentPrompt = ai.definePrompt({
     name: 'draftingAgentPrompt',
     tools: [findRelevantTemplates],
     output: { schema: DraftDocumentOutputSchema },
-    model: googleAI.model('gemini-2.5-flash'),
     prompt: `
         You are an expert legal drafting assistant.
         Your task is to generate a formal legal document based on user-provided details.
@@ -110,7 +109,11 @@ const draftDocumentFlow = ai.defineFlow(
     outputSchema: DraftDocumentOutputSchema,
   },
   async (input) => {
-    const { output } = await draftingAgentPrompt(input);
+    const {output} = await ai.generate({
+      prompt: draftingAgentPrompt,
+      input,
+      model: 'gemini-2.5-flash',
+    });
     return output!;
   }
 );

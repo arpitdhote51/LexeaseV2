@@ -47,7 +47,6 @@ const keyEntityRecognitionPrompt = ai.definePrompt({
   name: 'keyEntityRecognitionPrompt',
   input: {schema: KeyEntityRecognitionInputSchema},
   output: {schema: KeyEntityRecognitionOutputSchema},
-  model: googleAI.model('gemini-2.5-flash'),
   prompt: `You are an AI assistant specializing in legal document analysis.
   Your task is to identify and extract key entities from the following legal document.
   The entities should include parties involved, dates, locations, and other relevant information.
@@ -67,7 +66,11 @@ const keyEntityRecognitionFlow = ai.defineFlow(
     outputSchema: KeyEntityRecognitionOutputSchema,
   },
   async input => {
-    const {output} = await keyEntityRecognitionPrompt(input);
+    const {output} = await ai.generate({
+      prompt: keyEntityRecognitionPrompt,
+      input,
+      model: 'gemini-2.5-flash',
+    });
     return output!;
   }
 );

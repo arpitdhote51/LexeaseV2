@@ -36,7 +36,6 @@ const riskFlaggingPrompt = ai.definePrompt({
   name: 'riskFlaggingPrompt',
   input: {schema: RiskFlaggingInputSchema},
   output: {schema: RiskFlaggingOutputSchema},
-  model: googleAI.model('gemini-2.5-flash'),
   prompt: `You are an AI legal assistant tasked with identifying potentially risky or unusual clauses in legal documents.
 
   Analyze the following legal text and identify any clauses that could be problematic, unusual, or create a potential risk for the user. Provide a list of the risky clauses.
@@ -56,7 +55,11 @@ const riskFlaggingFlow = ai.defineFlow(
     outputSchema: RiskFlaggingOutputSchema,
   },
   async input => {
-    const {output} = await riskFlaggingPrompt(input);
+    const {output} = await ai.generate({
+      prompt: riskFlaggingPrompt,
+      input,
+      model: 'gemini-2.5-flash',
+    });
     return output!;
   }
 );

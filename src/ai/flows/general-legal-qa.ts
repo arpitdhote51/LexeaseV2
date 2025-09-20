@@ -37,7 +37,6 @@ const prompt = ai.definePrompt({
   name: 'generalLegalQAPrompt',
   input: {schema: GeneralLegalQAInputSchema},
   output: {schema: GeneralLegalQAOutputSchema},
-  model: googleAI.model('gemini-2.5-flash'),
   prompt: `You are "Lexy," a highly capable AI legal assistant designed for Indian legal professionals.
 
 You must adhere to the following capabilities and standards:
@@ -70,7 +69,11 @@ const generalLegalQAFlow = ai.defineFlow(
     outputSchema: GeneralLegalQAOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const {output} = await ai.generate({
+      prompt,
+      input,
+      model: 'gemini-2.5-flash',
+    });
     return output!;
   }
 );
