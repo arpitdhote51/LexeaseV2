@@ -23,10 +23,8 @@ import {
   RiskFlaggingInput,
   RiskFlaggingOutput,
 } from "@/ai/flows/risk-flagging";
-import {
-  parseDocument,
-  ParseDocumentInput,
-} from "@/ai/flows/parse-document";
+import { parseDocument } from "@/ai/flows/parse-document";
+import { getUploadUrl } from "@/ai/flows/get-upload-url";
 
 import SummaryDisplay from "./summary-display";
 import EntitiesDisplay from "./entities-display";
@@ -87,14 +85,6 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
     }
   };
 
-  const toDataURL = (file: File): Promise<string> =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-
   const processFile = async (fileToProcess: File) => {
     setIsParsing(true);
     setDocumentText('');
@@ -113,16 +103,31 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
     }
 
     try {
-        const dataUri = await toDataURL(fileToProcess);
-        const input: ParseDocumentInput = { fileDataUri: dataUri };
-        const result = await parseDocument(input);
+        // Step 1: Get a secure upload URL from the server
+        const { uploadUrl, gcsUrl } = await getUploadUrl({ mimeType: fileToProcess.type });
+
+        // Step 2: Upload the file directly to GCS using the signed URL
+        const uploadResponse = await fetch(uploadUrl, {
+            method: 'PUT',
+            body: fileToProcess,
+            headers: {
+                'Content-Type': fileToProcess.type,
+            },
+        });
+
+        if (!uploadResponse.ok) {
+            throw new Error(`Direct upload failed with status: ${uploadResponse.statusText}`);
+        }
+        
+        // Step 3: Call the server to parse the file from GCS
+        const result = await parseDocument({ gcsUrl });
         setDocumentText(result.documentText);
     } catch (error) {
-        console.error('Server-side parsing failed:', error);
+        console.error('File processing pipeline failed:', error);
         toast({
             variant: 'destructive',
             title: 'Parsing Error',
-            description: 'Could not read the content of your document. Please try again.',
+            description: `Could not read the content of your document. ${error instanceof Error ? error.message : 'Please try again.'}`,
         });
         setFile(null);
         setDocumentText('');
@@ -229,6 +234,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
                     <div className="text-center p-4">
                         <Loader2 className="mx-auto h-12 w-12 text-primary animate-spin" />
                         <p className="mt-4 font-semibold">Processing File...</p>
+                        <p className="text-sm text-muted-foreground">Uploading and parsing your document securely.</p>
                     </div>
                 ) : file ? (
                     <div className="text-center p-4">
