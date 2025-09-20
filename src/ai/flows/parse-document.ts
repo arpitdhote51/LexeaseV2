@@ -1,18 +1,18 @@
-
 'use server';
 
 /**
- * @fileOverview A server-side flow for parsing document files (PDF, DOCX) from Google Cloud Storage.
+ * @fileOverview A robust server-side flow for parsing document files from Google Cloud Storage.
  *
  * - parseDocument - A function that handles parsing the file content from GCS.
  * - ParseDocumentInput - The input type for the parseDocument function.
- * - ParseDocumentOutput - The return type for the parseDocument function.
+ * - ParseDocumentOutput - The return type for the aparseDocument function.
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import { Storage } from '@google-cloud/storage';
-import pdf from 'pdf-parse';
+import * as pdfjs from 'pdfjs-dist/legacy/build/pdf';
+import pdfParse from 'pdf-parse';
 import mammoth from 'mammoth';
 
 const ParseDocumentInputSchema = z.object({
@@ -37,8 +37,6 @@ const parseDocumentFlow = ai.defineFlow(
   },
   async ({ gcsUrl }) => {
     const storage = new Storage();
-    
-    // Extract bucket name and file name from GCS URL
     const urlMatch = gcsUrl.match(/^gs:\/\/([^/]+)\/(.+)$/);
     if (!urlMatch) {
       throw new Error('Invalid GCS URL format. Expected gs://<bucket>/<object>.');
@@ -52,12 +50,26 @@ const parseDocumentFlow = ai.defineFlow(
       const file = storage.bucket(bucketName).file(fileName);
       const [metadata] = await file.getMetadata();
       const contentType = metadata.contentType;
-
       const [buffer] = await file.download();
 
       if (contentType === 'application/pdf') {
-        const data = await pdf(buffer);
-        documentText = data.text;
+        try {
+          // Primary method: Use pdfjs-dist, converting Buffer to Uint8Array
+          const uint8array = new Uint8Array(buffer);
+          const pdfDoc = await pdfjs.getDocument({ data: uint8array }).promise;
+          let text = '';
+          for (let i = 1; i <= pdfDoc.numPages; i++) {
+            const page = await pdfDoc.getPage(i);
+            const content = await page.getTextContent();
+            text += content.items.map(item => ('str' in item ? item.str : '')).join(' ') + '\n';
+          }
+          documentText = text;
+        } catch (pdfjsError) {
+          console.warn('pdfjs-dist failed to parse, falling back to pdf-parse.', pdfjsError);
+          // Fallback method: Use pdf-parse
+          const data = await pdfParse(buffer);
+          documentText = data.text;
+        }
       } else if (contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
         const result = await mammoth.extractRawText({ buffer });
         documentText = result.value;
