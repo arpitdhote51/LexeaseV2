@@ -24,6 +24,7 @@ import {
   RiskFlaggingOutput,
 } from "@/ai/flows/risk-flagging";
 import { parseDocument } from "@/ai/flows/parse-document";
+import { getUploadUrl } from "@/ai/flows/get-upload-url";
 
 import SummaryDisplay from "./summary-display";
 import EntitiesDisplay from "./entities-display";
@@ -38,17 +39,6 @@ type UserRole = "layperson" | "lawStudent" | "lawyer";
 interface LexeaseAppProps {
     existingDocument?: DocumentData | null;
 }
-
-const fileToDataUri = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-            resolve(reader.result as string);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-};
 
 export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
   const [documentText, setDocumentText] = useState("");
@@ -90,7 +80,6 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-        setFile(selectedFile);
         processFile(selectedFile);
     }
   };
@@ -114,8 +103,21 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
     }
 
     try {
-        const fileDataUri = await fileToDataUri(fileToProcess);
-        const result = await parseDocument({ fileDataUri });
+        // Step 1: Get a secure URL for uploading
+        const { uploadUrl, gcsUrl } = await getUploadUrl({
+            fileName: fileToProcess.name,
+            contentType: fileToProcess.type,
+        });
+
+        // Step 2: Upload the file directly to GCS
+        await fetch(uploadUrl, {
+            method: 'PUT',
+            body: fileToProcess,
+            headers: { 'Content-Type': fileToProcess.type },
+        });
+
+        // Step 3: Call the server-side parser with the GCS path
+        const result = await parseDocument({ gcsUrl });
         setDocumentText(result.documentText);
     } catch (error) {
         console.error('File processing pipeline failed:', error);
