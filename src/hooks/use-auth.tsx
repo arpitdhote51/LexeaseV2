@@ -37,34 +37,21 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock user for disabled authentication
-const mockUser = {
-  uid: "guest-user-123",
-  email: "guest@lexease.com",
-  displayName: "Guest User",
-  emailVerified: true,
-};
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  // Set to true to enable Firebase authentication
-  const authEnabled = false; 
-
-  const [user, setUser] = useState<User | null>(authEnabled ? null : mockUser as unknown as User);
-  const [loading, setLoading] = useState(authEnabled);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!authEnabled) return;
-
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
     });
     return () => unsubscribe();
-  }, [authEnabled]);
+  }, []);
 
   const signIn = async (data: AuthFormValues) => {
-    if (!authEnabled || !data.password) return;
+    if (!data.password) return;
     try {
       const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
       if (!userCredential.user.emailVerified) {
@@ -91,7 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signUp = async (data: AuthFormValues) => {
-    if (!authEnabled || !data.password) return;
+    if (!data.password) return;
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -119,7 +106,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    if (!authEnabled) return;
     try {
       await firebaseSignOut(auth);
     } catch (error: any) {
@@ -132,7 +118,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const sendPasswordReset = async (email: string) => {
-    if (!authEnabled) return;
     try {
       await sendPasswordResetEmail(auth, email);
       toast({
@@ -149,7 +134,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
   
   const resendVerificationEmail = async (email: string, password: string) => {
-    if (!authEnabled) return;
     try {
       // To resend, we need to temporarily sign the user in
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -173,7 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     signIn,
     signUp,
-signOut,
+    signOut,
     sendPasswordReset,
     resendVerificationEmail
   };
