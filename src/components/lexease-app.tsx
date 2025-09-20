@@ -25,6 +25,7 @@ import {
 } from "@/ai/flows/risk-flagging";
 import { parseDocument } from "@/ai/flows/parse-document";
 import { getUploadUrl } from "@/ai/flows/get-upload-url";
+import { GlobalWorkerOptions } from "pdfjs-dist";
 
 import SummaryDisplay from "./summary-display";
 import EntitiesDisplay from "./entities-display";
@@ -53,6 +54,13 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
   const [file, setFile] = useState<File | null>(null);
 
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Set workerSrc for pdfjs-dist. This is a common requirement for Next.js.
+    // We use a CDN to avoid bundling issues with the worker file.
+    // The version should match the one in package.json.
+    GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.5.136/pdf.worker.min.mjs`;
+  }, []);
 
   useEffect(() => {
     if (existingDocument) {
