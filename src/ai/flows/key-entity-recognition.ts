@@ -66,7 +66,10 @@ const keyEntityRecognitionFlow = ai.defineFlow(
     outputSchema: KeyEntityRecognitionOutputSchema,
   },
   async input => {
-    const {output} = await keyEntityRecognitionPrompt(input);
+    const {output} = await ai.generate({
+        prompt: keyEntityRecognitionPrompt,
+        input
+    });
     return output!;
   }
 );

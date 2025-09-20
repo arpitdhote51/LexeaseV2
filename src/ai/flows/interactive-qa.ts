@@ -146,7 +146,10 @@ const interactiveQAFlow = ai.defineFlow(
     outputSchema: InteractiveQAOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const {output} = await ai.generate({
+        prompt,
+        input
+    });
     return output!;
   }
 );

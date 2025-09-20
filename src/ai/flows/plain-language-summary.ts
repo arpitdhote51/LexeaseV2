@@ -63,7 +63,10 @@ const plainLanguageSummarizationFlow = ai.defineFlow(
     outputSchema: PlainLanguageSummarizationOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const {output} = await ai.generate({
+        prompt,
+        input
+    });
     return output!;
   }
 );
