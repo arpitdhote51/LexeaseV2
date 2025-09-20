@@ -32,7 +32,7 @@ const nextConfig = {
   },
   webpack: (config) => {
     // Required by pdfjs-dist
-    config.resolve.alias.canvas = false;
+    config.externals.push('canvas');
     return config;
   },
 };
