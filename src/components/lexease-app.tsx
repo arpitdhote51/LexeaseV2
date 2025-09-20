@@ -55,8 +55,8 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
   const { toast } = useToast();
   
   useEffect(() => {
-    // Set the workerSrc for pdf.js. Using a specific version from a CDN.
-    pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+    // Set the workerSrc for pdf.js. Using a specific version from a CDN for stability.
+    pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.js`;
   }, []);
   
   useEffect(() => {
@@ -109,16 +109,18 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
 
     try {
         let text = '';
-        const arrayBuffer = await fileToProcess.arrayBuffer();
-
         if (fileToProcess.type === 'application/pdf') {
+            const arrayBuffer = await fileToProcess.arrayBuffer();
             const pdf = await pdfjs.getDocument(arrayBuffer).promise;
+            let extractedText = '';
             for (let i = 1; i <= pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
                 const content = await page.getTextContent();
-                text += content.items.map((item: any) => item.str).join(' ');
+                extractedText += content.items.map((item: any) => item.str).join(' ');
             }
+            text = extractedText;
         } else if (fileToProcess.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+            const arrayBuffer = await fileToProcess.arrayBuffer();
             const result = await mammoth.extractRawText({ arrayBuffer });
             text = result.value;
         } else {
