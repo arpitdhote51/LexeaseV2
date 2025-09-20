@@ -66,7 +66,7 @@ const plainLanguageSummarizationFlow = ai.defineFlow(
     const {output} = await ai.generate({
       prompt,
       input,
-      model: googleAI('gemini-1.5-flash'),
+      model: 'gemini-1.5-flash',
     });
     return output!;
   }

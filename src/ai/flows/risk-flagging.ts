@@ -58,7 +58,7 @@ const riskFlaggingFlow = ai.defineFlow(
     const {output} = await ai.generate({
       prompt: riskFlaggingPrompt,
       input,
-      model: googleAI('gemini-1.5-flash'),
+      model: 'gemini-1.5-flash',
     });
     return output!;
   }
