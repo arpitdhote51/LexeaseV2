@@ -11,7 +11,6 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import {googleAI} from '@genkit-ai/googleai';
 
 const GeneralLegalQAInputSchema = z.object({
   question: z.string().describe('The user question about a legal topic.'),

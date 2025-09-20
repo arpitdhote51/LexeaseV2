@@ -10,7 +10,6 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import {googleAI} from '@genkit-ai/googleai';
 
 const InteractiveQAInputSchema = z.object({
   documentText: z.string().describe('The text content of the legal document.'),
