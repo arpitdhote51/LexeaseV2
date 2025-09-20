@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -9,7 +10,6 @@
  */
 
 import {ai} from '@/ai/genkit';
-import { googleAI } from '@genkit-ai/googleai';
 import {z} from 'genkit';
 
 const InteractiveQAInputSchema = z.object({
@@ -149,7 +149,7 @@ const interactiveQAFlow = ai.defineFlow(
     const {output} = await ai.generate({
       prompt,
       input,
-      model: googleAI('gemini-1.5-flash'),
+      model: 'gemini-1.5-flash',
     });
     return output!;
   }
