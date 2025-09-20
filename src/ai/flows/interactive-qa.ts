@@ -146,11 +146,7 @@ const interactiveQAFlow = ai.defineFlow(
     outputSchema: InteractiveQAOutputSchema,
   },
   async input => {
-    const {output} = await ai.generate({
-      prompt,
-      input,
-      model: 'gemini-1.5-flash',
-    });
+    const {output} = await prompt(input);
     return output!;
   }
 );

@@ -8,11 +8,6 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { useRouter } from "next/navigation";
-import { GlobalWorkerOptions, getDocument } from "pdfjs-dist";
-import mammoth from "mammoth";
-
-
 import {
   plainLanguageSummarization,
   PlainLanguageSummarizationInput,
@@ -28,6 +23,10 @@ import {
   RiskFlaggingInput,
   RiskFlaggingOutput,
 } from "@/ai/flows/risk-flagging";
+import {
+  parseDocument,
+  ParseDocumentInput,
+} from "@/ai/flows/parse-document";
 
 import SummaryDisplay from "./summary-display";
 import EntitiesDisplay from "./entities-display";
@@ -44,7 +43,6 @@ interface LexeaseAppProps {
 }
 
 export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
-  const router = useRouter();
   const [documentText, setDocumentText] = useState("");
   const [userRole, setUserRole] = useState<UserRole>("layperson");
   const [isLoading, setIsLoading] = useState(false);
@@ -59,9 +57,6 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Set the workerSrc for pdfjs-dist
-    GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${GlobalWorkerOptions.version}/pdf.worker.min.mjs`;
-
     if (existingDocument) {
       setDocumentText(existingDocument.documentText);
       if (existingDocument.analysis) {
@@ -92,9 +87,18 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
     }
   };
 
+  const toDataURL = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
   const processFile = async (fileToProcess: File) => {
     setIsParsing(true);
     setDocumentText('');
+    setAnalysisResult(null);
     
     const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
     if (!validTypes.includes(fileToProcess.type)) {
@@ -109,58 +113,20 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
     }
 
     try {
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            const arrayBuffer = e.target?.result as ArrayBuffer;
-            let extractedText = '';
-
-            try {
-                 if (fileToProcess.type === 'application/pdf') {
-                    const pdfDoc = await getDocument({data: arrayBuffer}).promise;
-                    let text = '';
-                    for (let i = 1; i <= pdfDoc.numPages; i++) {
-                        const page = await pdfDoc.getPage(i);
-                        const content = await page.getTextContent();
-                        text += content.items.map((item: any) => item.str).join(' ');
-                    }
-                    extractedText = text;
-                } else if (fileToProcess.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-                    const result = await mammoth.extractRawText({ arrayBuffer });
-                    extractedText = result.value;
-                } else if (fileToProcess.type === 'text/plain') {
-                    extractedText = new TextDecoder().decode(arrayBuffer);
-                }
-                setDocumentText(extractedText);
-            } catch (parsingError) {
-                 console.error('Client-side parsing error:', parsingError);
-                 toast({
-                    variant: 'destructive',
-                    title: 'Parsing Error',
-                    description: 'Could not read the content of your file.',
-                });
-                setFile(null);
-            } finally {
-                setIsParsing(false);
-            }
-        };
-        reader.onerror = () => {
-             console.error('File reading error');
-             toast({
-                variant: 'destructive',
-                title: 'File Error',
-                description: 'There was an error reading your file.',
-            });
-            setIsParsing(false);
-        };
-        reader.readAsArrayBuffer(fileToProcess);
+        const dataUri = await toDataURL(fileToProcess);
+        const input: ParseDocumentInput = { fileDataUri: dataUri };
+        const result = await parseDocument(input);
+        setDocumentText(result.documentText);
     } catch (error) {
-        console.error('File processing error:', error);
+        console.error('Server-side parsing failed:', error);
         toast({
             variant: 'destructive',
-            title: 'File Error',
-            description: 'An unexpected error occurred while processing your file.',
+            title: 'Parsing Error',
+            description: 'Could not read the content of your document. Please try again.',
         });
         setFile(null);
+        setDocumentText('');
+    } finally {
         setIsParsing(false);
     }
   };

@@ -66,11 +66,7 @@ const keyEntityRecognitionFlow = ai.defineFlow(
     outputSchema: KeyEntityRecognitionOutputSchema,
   },
   async input => {
-    const {output} = await ai.generate({
-      prompt: keyEntityRecognitionPrompt,
-      input,
-      model: 'gemini-1.5-flash',
-    });
+    const {output} = await keyEntityRecognitionPrompt(input);
     return output!;
   }
 );
