@@ -8,8 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import pdfjs from "pdfjs-dist/build/pdf";
-import "pdfjs-dist/build/pdf.worker.entry";
+import { GlobalWorkerOptions, getDocument } from "pdfjs-dist";
 import mammoth from "mammoth";
 
 
@@ -59,6 +58,9 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Set the workerSrc for pdfjs-dist
+    GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${GlobalWorkerOptions.version}/pdf.worker.min.mjs`;
+
     if (existingDocument) {
       setDocumentText(existingDocument.documentText);
       if (existingDocument.analysis) {
@@ -113,7 +115,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
 
             try {
                  if (fileToProcess.type === 'application/pdf') {
-                    const pdfDoc = await pdfjs.getDocument({data: arrayBuffer}).promise;
+                    const pdfDoc = await getDocument({data: arrayBuffer}).promise;
                     let text = '';
                     for (let i = 1; i <= pdfDoc.numPages; i++) {
                         const page = await pdfDoc.getPage(i);
