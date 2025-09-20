@@ -23,7 +23,8 @@ import {
   RiskFlaggingInput,
   RiskFlaggingOutput,
 } from "@/ai/flows/risk-flagging";
-import { parseDocument } from "@/ai/flows/parse-document";
+import * as pdfjsLib from "pdfjs-dist";
+import mammoth from "mammoth";
 
 import SummaryDisplay from "./summary-display";
 import EntitiesDisplay from "./entities-display";
@@ -33,22 +34,14 @@ import { Skeleton } from "./ui/skeleton";
 import type { DocumentData } from "@/lib/types";
 import Header from "./layout/header";
 
+// Set up the worker for pdfjs
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+
 type UserRole = "layperson" | "lawStudent" | "lawyer";
 
 interface LexeaseAppProps {
     existingDocument?: DocumentData | null;
 }
-
-const fileToDataUri = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-            resolve(reader.result as string);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-};
 
 export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
   const [documentText, setDocumentText] = useState("");
@@ -113,11 +106,30 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
     }
 
     try {
-        const fileDataUri = await fileToDataUri(fileToProcess);
-        const result = await parseDocument({ fileDataUri });
-        setDocumentText(result.documentText);
+        let text = '';
+        const fileReader = new FileReader();
+
+        if (fileToProcess.type === 'application/pdf') {
+            const arrayBuffer = await fileToProcess.arrayBuffer();
+            const loadingTask = pdfjsLib.getDocument(new Uint8Array(arrayBuffer));
+            const pdf = await loadingTask.promise;
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const textContent = await page.getTextContent();
+                text += textContent.items.map(item => (item as any).str).join(' ');
+            }
+        } else if (fileToProcess.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+            const arrayBuffer = await fileToProcess.arrayBuffer();
+            const result = await mammoth.extractRawText({ arrayBuffer });
+            text = result.value;
+        } else { // text/plain
+            text = await fileToProcess.text();
+        }
+
+        setDocumentText(text);
+
     } catch (error) {
-        console.error('File processing pipeline failed:', error);
+        console.error('Client-side file processing failed:', error);
         toast({
             variant: 'destructive',
             title: 'Parsing Error',
@@ -227,7 +239,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
                     <div className="text-center p-4">
                         <Loader2 className="mx-auto h-12 w-12 text-primary animate-spin" />
                         <p className="mt-4 font-semibold">Processing File...</p>
-                        <p className="text-sm text-muted-foreground">Reading your document securely.</p>
+                        <p className="text-sm text-muted-foreground">Reading your document securely in your browser.</p>
                     </div>
                 ) : file ? (
                     <div className="text-center p-4">
@@ -291,9 +303,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Analyzing...
                   </>
-                ) : (
-                  "Analyze Document"
-                )}
+                ) : analysisResult ? "Analysis Complete" : "Analyze Document" }
               </Button>
             </CardContent>
           </Card>
@@ -321,7 +331,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
                     <TabsTrigger value="summary">Summary</TabsTrigger>
                     <TabsTrigger value="entities">Key Entities</TabsTrigger>
                     <TabsTrigger value="risks">Risk Flags</TabsTrigger>
-                    <TabsTrigger value="qa">Q&A</TabsTrigger>
+                    <TabsTrigger value="qa" disabled={!documentText}>Q&A</TabsTrigger>
                   </TabsList>
                   {analysisResult ? (
                     <>
@@ -342,6 +352,8 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
                     <div className="text-center text-muted-foreground py-16">
                         {(isLoading || isParsing) ? (
                             <AnalysisPlaceholder />
+                        ) : !documentText ? (
+                            <p>Upload a document to get started.</p>
                         ) : (
                              <p>Click "Analyze Document" to see the results.</p>
                         )}
@@ -357,5 +369,3 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
     </>
   );
 }
-
-    
