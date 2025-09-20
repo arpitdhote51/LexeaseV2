@@ -6,7 +6,7 @@ export interface DocumentData {
   id: string;
   userId: string;
   fileName: string;
-  documentText: string;
+  documentDataUri: string;
   analysis: {
     summary: PlainLanguageSummarizationOutput;
     entities: KeyEntityRecognitionOutput;
