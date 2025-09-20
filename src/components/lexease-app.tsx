@@ -188,7 +188,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
     if (files && files.length > 0) {
       processFile(files[0]);
     }
-  }, [existingDocument, isLoading, isParsing]);
+  }, [existingDocument, isLoading, isParsing, processFile]);
 
   const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -357,3 +357,5 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
     </>
   );
 }
+
+    
