@@ -9,6 +9,7 @@
  */
 
 import {ai} from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/googleai';
 import {z} from 'genkit';
 
 const PlainLanguageSummarizationInputSchema = z.object({
@@ -65,7 +66,7 @@ const plainLanguageSummarizationFlow = ai.defineFlow(
     const {output} = await ai.generate({
       prompt,
       input,
-      model: 'gemini-1.5-flash',
+      model: googleAI('gemini-1.5-flash'),
     });
     return output!;
   }
