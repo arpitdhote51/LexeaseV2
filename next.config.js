@@ -36,9 +36,6 @@ const nextConfig = {
     config.resolve.alias.canvas = false;
     return config;
   },
-  env: {
-    GEMINI_API_KEY: process.env.GEMINI_API_KEY,
-  }
 };
 
 module.exports = nextConfig;
