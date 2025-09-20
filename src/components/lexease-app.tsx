@@ -24,7 +24,6 @@ import {
   RiskFlaggingOutput,
 } from "@/ai/flows/risk-flagging";
 import { parseDocument } from "@/ai/flows/parse-document";
-import { getUploadUrl } from "@/ai/flows/get-upload-url";
 import { GlobalWorkerOptions } from "pdfjs-dist";
 
 import SummaryDisplay from "./summary-display";
@@ -56,9 +55,8 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Set workerSrc for pdfjs-dist. This is a common requirement for Next.js.
-    // We use a CDN to avoid bundling issues with the worker file.
-    // The version should match the one in package.json.
+    // This is a workaround for Next.js build issues with pdfjs-dist.
+    // We manually specify the path to the worker script from a CDN.
     GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.5.136/pdf.worker.min.mjs`;
   }, []);
 
@@ -93,6 +91,17 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
     }
   };
 
+  const fileToDataUri = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            resolve(reader.result as string);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+  };
+
   const processFile = async (fileToProcess: File) => {
     setIsParsing(true);
     setDocumentText('');
@@ -111,27 +120,11 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
     }
 
     try {
-        // Step 1: Get a secure upload URL from the server
-        const { uploadUrl, gcsUrl } = await getUploadUrl({ mimeType: fileToProcess.type });
-
-        // Step 2: Upload the file directly to GCS using the signed URL
-        const uploadResponse = await fetch(uploadUrl, {
-            method: 'PUT',
-            body: fileToProcess,
-            headers: {
-                'Content-Type': fileToProcess.type,
-            },
-        });
-
-        if (!uploadResponse.ok) {
-            throw new Error(`Direct upload failed with status: ${uploadResponse.statusText}`);
-        }
-        
-        // Step 3: Call the server to parse the file from GCS
-        const result = await parseDocument({ gcsUrl });
+        const fileDataUri = await fileToDataUri(fileToProcess);
+        const result = await parseDocument({ fileDataUri });
         setDocumentText(result.documentText);
     } catch (error) {
-        console.error('File processing pipeline failed:', error);
+        console.error('File processing failed:', error);
         toast({
             variant: 'destructive',
             title: 'Parsing Error',
@@ -242,7 +235,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
                     <div className="text-center p-4">
                         <Loader2 className="mx-auto h-12 w-12 text-primary animate-spin" />
                         <p className="mt-4 font-semibold">Processing File...</p>
-                        <p className="text-sm text-muted-foreground">Uploading and parsing your document securely.</p>
+                        <p className="text-sm text-muted-foreground">Reading your document securely.</p>
                     </div>
                 ) : file ? (
                     <div className="text-center p-4">
