@@ -6,7 +6,7 @@ export interface DocumentData {
   id: string;
   userId: string;
   fileName: string;
-  documentDataUri: string;
+  documentDataUri: string; // This now holds the text content for simplicity, despite the name
   analysis: {
     summary: PlainLanguageSummarizationOutput;
     entities: KeyEntityRecognitionOutput;

@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import * as pdfjs from "pdfjs-dist";
+import mammoth from "mammoth";
 import {
   plainLanguageSummarization,
   PlainLanguageSummarizationInput,
@@ -38,22 +40,11 @@ interface LexeaseAppProps {
     existingDocument?: DocumentData | null;
 }
 
-// Helper to read file as Data URI
-const fileToDataURI = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-};
-
-
 export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
-  const [documentDataUri, setDocumentDataUri] = useState("");
+  const [documentText, setDocumentText] = useState("");
   const [userRole, setUserRole] = useState<UserRole>("layperson");
   const [isLoading, setIsLoading] = useState(false);
-  const [isParsing, setIsParsing] = useState(false); // Now used for converting to Data URI
+  const [isParsing, setIsParsing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<{
     summary: PlainLanguageSummarizationOutput;
     entities: KeyEntityRecognitionOutput;
@@ -62,10 +53,16 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
   const [file, setFile] = useState<File | null>(null);
 
   const { toast } = useToast();
+  
+  useEffect(() => {
+    // Set workerSrc for pdfjs-dist. This is crucial for it to work with Next.js
+    // Using a CDN is the most robust method.
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+  }, []);
 
   useEffect(() => {
     if (existingDocument) {
-      setDocumentDataUri(existingDocument.documentDataUri);
+      setDocumentText(existingDocument.documentDataUri); // Assuming documentDataUri is actually text for old data
       if (existingDocument.analysis) {
         setAnalysisResult({
             summary: existingDocument.analysis.summary,
@@ -78,7 +75,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
       }
     } else {
         // Reset state for new analysis
-        setDocumentDataUri("");
+        setDocumentText("");
         setAnalysisResult(null);
         setFile(null);
         setUserRole("layperson");
@@ -96,7 +93,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
   const processFile = async (fileToProcess: File) => {
     setFile(fileToProcess);
     setIsParsing(true);
-    setDocumentDataUri('');
+    setDocumentText('');
     setAnalysisResult(null);
     
     const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
@@ -112,24 +109,39 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
     }
 
     try {
-        const dataUri = await fileToDataURI(fileToProcess);
-        setDocumentDataUri(dataUri);
+        let text = '';
+        if (fileToProcess.type === 'application/pdf') {
+            const arrayBuffer = await fileToProcess.arrayBuffer();
+            const pdf = await pdfjs.getDocument(arrayBuffer).promise;
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const content = await page.getTextContent();
+                text += content.items.map((item: any) => item.str).join(' ');
+            }
+        } else if (fileToProcess.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+            const arrayBuffer = await fileToProcess.arrayBuffer();
+            const result = await mammoth.extractRawText({ arrayBuffer });
+            text = result.value;
+        } else {
+            text = await fileToProcess.text();
+        }
+        setDocumentText(text);
     } catch (error) {
-        console.error('File to Data URI conversion failed:', error);
+        console.error('File parsing failed:', error);
         toast({
             variant: 'destructive',
             title: 'File Read Error',
-            description: `Could not read your file. ${error instanceof Error ? error.message : 'Please try again.'}`,
+            description: `Could not read the content of your document. ${error instanceof Error ? error.message : 'Please try again.'}`,
         });
         setFile(null);
-        setDocumentDataUri('');
+        setDocumentText('');
     } finally {
         setIsParsing(false);
     }
   };
 
   const handleAnalyze = async () => {
-    if (!documentDataUri) {
+    if (!documentText) {
       toast({
         variant: "destructive",
         title: "Error",
@@ -143,11 +155,11 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
 
     try {
       const summarizationInput: PlainLanguageSummarizationInput = {
-        documentDataUri,
+        documentText,
         userRole,
       };
-      const entityInput: KeyEntityRecognitionInput = { documentDataUri };
-      const riskInput: RiskFlaggingInput = { documentDataUri };
+      const entityInput: KeyEntityRecognitionInput = { documentText };
+      const riskInput: RiskFlaggingInput = { documentText };
 
       const [summary, entities, risks] = await Promise.all([
         plainLanguageSummarization(summarizationInput),
@@ -224,8 +236,8 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
                 {isParsing ? (
                     <div className="text-center p-4">
                         <Loader2 className="mx-auto h-12 w-12 text-primary animate-spin" />
-                        <p className="mt-4 font-semibold">Processing File...</p>
-                        <p className="text-sm text-muted-foreground">Preparing your document for analysis.</p>
+                        <p className="mt-4 font-semibold">Parsing Document...</p>
+                        <p className="text-sm text-muted-foreground">Extracting text for analysis.</p>
                     </div>
                 ) : file ? (
                     <div className="text-center p-4">
@@ -238,7 +250,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
                                 className="mt-2 text-red-500 hover:text-red-700"
                                 onClick={() => {
                                     setFile(null);
-                                    setDocumentDataUri('');
+                                    setDocumentText('');
                                     setAnalysisResult(null);
                                 }}
                             >
@@ -283,7 +295,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
                   </div>
                 </RadioGroup>
               </div>
-              <Button onClick={handleAnalyze} disabled={isLoading || isParsing || !file || !!analysisResult || !documentDataUri} className="w-full bg-accent text-white font-semibold py-3 rounded-lg hover:bg-accent/90">
+              <Button onClick={handleAnalyze} disabled={isLoading || isParsing || !file || !!analysisResult || !documentText} className="w-full bg-accent text-white font-semibold py-3 rounded-lg hover:bg-accent/90">
                 {isLoading && !analysisResult ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -307,7 +319,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
             </CardHeader>
             <CardContent>
               {(isLoading || isParsing) && !analysisResult ? <AnalysisPlaceholder /> :
-                !analysisResult && !documentDataUri && !existingDocument ? (
+                !analysisResult && !documentText && !existingDocument ? (
                   <div className="text-center text-muted-foreground py-16">
                     <p>Your analysis results will appear here once you upload and analyze a document.</p>
                   </div>
@@ -317,7 +329,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
                     <TabsTrigger value="summary">Summary</TabsTrigger>
                     <TabsTrigger value="entities">Key Entities</TabsTrigger>
                     <TabsTrigger value="risks">Risk Flags</TabsTrigger>
-                    <TabsTrigger value="qa" disabled={!documentDataUri}>Q&A</TabsTrigger>
+                    <TabsTrigger value="qa" disabled={!documentText}>Q&A</TabsTrigger>
                   </TabsList>
                   {analysisResult ? (
                     <>
@@ -331,14 +343,14 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
                         <RisksDisplay risks={analysisResult.risks.riskyClauses} />
                       </TabsContent>
                       <TabsContent value="qa">
-                        <QAChat documentId={existingDocument ? existingDocument.id : 'temp-id'} documentDataUri={documentDataUri} />
+                        <QAChat documentId={existingDocument ? existingDocument.id : 'temp-id'} documentText={documentText} />
                       </TabsContent>
                     </>
                   ) : (
                     <div className="text-center text-muted-foreground py-16">
                         {(isLoading || isParsing) ? (
                             <AnalysisPlaceholder />
-                        ) : !documentDataUri ? (
+                        ) : !documentText ? (
                             <p>Upload a document to get started.</p>
                         ) : (
                              <p>Click "Analyze Document" to see the results.</p>

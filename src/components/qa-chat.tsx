@@ -15,7 +15,7 @@ import { db } from "@/lib/firebase";
 import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "firebase/firestore";
 
 interface QAChatProps {
-  documentDataUri: string;
+  documentText: string;
   documentId: string;
 }
 
@@ -26,7 +26,7 @@ interface Message {
   timestamp?: any;
 }
 
-export default function QAChat({ documentDataUri, documentId }: QAChatProps) {
+export default function QAChat({ documentText, documentId }: QAChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -166,7 +166,7 @@ export default function QAChat({ documentDataUri, documentId }: QAChatProps) {
     setIsLoading(true);
 
     try {
-        const qaInput: InteractiveQAInput = { documentDataUri, question: currentInput };
+        const qaInput: InteractiveQAInput = { documentText, question: currentInput };
         const result = await interactiveQA(qaInput);
         const assistantMessage: Message = { role: "assistant", content: result.answer };
         setMessages(prev => [...prev, assistantMessage]);
@@ -248,7 +248,7 @@ export default function QAChat({ documentDataUri, documentId }: QAChatProps) {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask a question about the document..."
-                disabled={isLoading || !documentDataUri}
+                disabled={isLoading || !documentText}
                 className="text-base"
               />
               <Button type="button" variant={isRecognizing ? "destructive" : "outline"} size="icon" onClick={startRecognition} disabled={isLoading}>

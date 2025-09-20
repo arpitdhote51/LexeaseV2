@@ -14,7 +14,7 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const KeyEntityRecognitionInputSchema = z.object({
-  documentDataUri: z.string().describe("The document to analyze, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
+  documentText: z.string().describe("The text content of the document to analyze."),
 });
 export type KeyEntityRecognitionInput = z.infer<
   typeof KeyEntityRecognitionInputSchema
@@ -53,7 +53,7 @@ const keyEntityRecognitionPrompt = ai.definePrompt({
   The extracted entities should be in the same language as the document.
 
   Document:
-  {{media url=documentDataUri}}
+  {{{documentText}}}
 
   Please provide the output in the structured JSON format.
 `,

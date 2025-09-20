@@ -13,7 +13,7 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const RiskFlaggingInputSchema = z.object({
-  documentDataUri: z.string().describe("The document to analyze, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
+  documentText: z.string().describe("The text content of the document to analyze."),
 });
 export type RiskFlaggingInput = z.infer<typeof RiskFlaggingInputSchema>;
 
@@ -42,7 +42,7 @@ const riskFlaggingPrompt = ai.definePrompt({
   The response should be in the same language as the document.
 
   Legal Document:
-  {{media url=documentDataUri}}
+  {{{documentText}}}
 
   Return only a list of the potentially risky clauses in the structured JSON format.
   `,
