@@ -30,11 +30,6 @@ const nextConfig = {
       },
     ],
   },
-  webpack: (config, { isServer }) => {
-    // Required for pdfjs-dist
-    config.resolve.alias.canvas = false;
-    return config;
-  },
 };
 
 module.exports = nextConfig;

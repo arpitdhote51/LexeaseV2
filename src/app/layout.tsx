@@ -5,11 +5,6 @@ import { AuthProvider } from "@/hooks/use-auth";
 import { Toaster } from "@/components/ui/toaster";
 import { type ReactNode } from "react";
 import { PT_Sans, Space_Grotesk } from 'next/font/google';
-import * as pdfjsLib from "pdfjs-dist";
-
-// Set up the worker for pdfjs at the app entry point
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
-
 
 const ptSans = PT_Sans({
   subsets: ['latin'],

@@ -23,8 +23,9 @@ import {
   RiskFlaggingInput,
   RiskFlaggingOutput,
 } from "@/ai/flows/risk-flagging";
-import * as pdfjsLib from "pdfjs-dist";
 import mammoth from "mammoth";
+// Important: Use the browser-compatible version of pdf-parse
+import pdf from "pdf-parse/lib/pdf-parse.js";
 
 import SummaryDisplay from "./summary-display";
 import EntitiesDisplay from "./entities-display";
@@ -104,19 +105,12 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
 
     try {
         let text = '';
-        const fileReader = new FileReader();
+        const arrayBuffer = await fileToProcess.arrayBuffer();
 
         if (fileToProcess.type === 'application/pdf') {
-            const arrayBuffer = await fileToProcess.arrayBuffer();
-            const loadingTask = pdfjsLib.getDocument(new Uint8Array(arrayBuffer));
-            const pdf = await loadingTask.promise;
-            for (let i = 1; i <= pdf.numPages; i++) {
-                const page = await pdf.getPage(i);
-                const textContent = await page.getTextContent();
-                text += textContent.items.map(item => (item as any).str).join(' ');
-            }
+            const data = await pdf(arrayBuffer);
+            text = data.text;
         } else if (fileToProcess.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-            const arrayBuffer = await fileToProcess.arrayBuffer();
             const result = await mammoth.extractRawText({ arrayBuffer });
             text = result.value;
         } else { // text/plain
