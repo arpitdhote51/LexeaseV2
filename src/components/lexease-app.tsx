@@ -34,10 +34,6 @@ import { Skeleton } from "./ui/skeleton";
 import type { DocumentData } from "@/lib/types";
 import Header from "./layout/header";
 
-// Set the workerSrc for pdf.js
-// This is the definitive fix to prevent "dynamically imported module" errors.
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
-
 type UserRole = "layperson" | "lawStudent" | "lawyer";
 
 interface LexeaseAppProps {
@@ -57,6 +53,11 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
   const [file, setFile] = useState<File | null>(null);
 
   const { toast } = useToast();
+  
+  useEffect(() => {
+    // Set the workerSrc for pdf.js. Using a specific version from a CDN.
+    pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+  }, []);
   
   useEffect(() => {
     if (existingDocument) {
@@ -108,8 +109,9 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
 
     try {
         let text = '';
+        const arrayBuffer = await fileToProcess.arrayBuffer();
+
         if (fileToProcess.type === 'application/pdf') {
-            const arrayBuffer = await fileToProcess.arrayBuffer();
             const pdf = await pdfjs.getDocument(arrayBuffer).promise;
             for (let i = 1; i <= pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
@@ -117,7 +119,6 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
                 text += content.items.map((item: any) => item.str).join(' ');
             }
         } else if (fileToProcess.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-            const arrayBuffer = await fileToProcess.arrayBuffer();
             const result = await mammoth.extractRawText({ arrayBuffer });
             text = result.value;
         } else {
