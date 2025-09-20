@@ -72,7 +72,7 @@ const generalLegalQAFlow = ai.defineFlow(
     const {output} = await ai.generate({
       prompt,
       input,
-      model: 'gemini-2.5-flash',
+      model: googleAI('gemini-1.5-flash'),
     });
     return output!;
   }

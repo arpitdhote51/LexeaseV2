@@ -112,7 +112,7 @@ const draftDocumentFlow = ai.defineFlow(
     const {output} = await ai.generate({
       prompt: draftingAgentPrompt,
       input,
-      model: 'gemini-2.5-flash',
+      model: googleAI('gemini-1.5-flash'),
     });
     return output!;
   }
