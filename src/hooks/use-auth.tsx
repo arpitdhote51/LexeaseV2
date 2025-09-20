@@ -43,11 +43,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
-    });
-    return () => unsubscribe();
+    // This check is to prevent Firebase from trying to initialize on the server.
+    if (typeof window !== 'undefined') {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        setUser(user);
+        setLoading(false);
+      });
+      return () => unsubscribe();
+    } else {
+        setLoading(false);
+    }
   }, []);
 
   const signIn = async (data: AuthFormValues) => {

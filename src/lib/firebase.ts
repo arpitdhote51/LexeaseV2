@@ -19,7 +19,7 @@ const firebaseConfig = {
 let app: FirebaseApp;
 let auth: Auth;
 let db: Firestore;
-let analytics: Analytics;
+let analytics: Analytics | undefined = undefined;
 
 // Initialize Firebase on the client side
 if (typeof window !== 'undefined') {
@@ -35,11 +35,20 @@ if (typeof window !== 'undefined') {
         ) {
             app = initializeApp(firebaseConfig);
             auth = getAuth(app);
-            db = initializeFirestore(app, {
-                localCache: persistentLocalCache({})
-            });
+            try {
+                db = initializeFirestore(app, {
+                    localCache: persistentLocalCache({})
+                });
+            } catch (e) {
+                // Firestore can only be initialized once
+                db = getFirestore(app);
+            }
             if (firebaseConfig.measurementId) {
-                analytics = getAnalytics(app);
+                try {
+                    analytics = getAnalytics(app);
+                } catch(e) {
+                    console.error("Failed to initialize Analytics", e);
+                }
             }
         } else {
             console.error("Firebase configuration is missing or incomplete. Please check your environment variables.");
@@ -49,7 +58,11 @@ if (typeof window !== 'undefined') {
         auth = getAuth(app);
         db = getFirestore(app);
         if (firebaseConfig.measurementId) {
-            analytics = getAnalytics(app);
+            try {
+                analytics = getAnalytics(app);
+            } catch(e) {
+                 console.error("Failed to initialize Analytics", e);
+            }
         }
     }
 }
