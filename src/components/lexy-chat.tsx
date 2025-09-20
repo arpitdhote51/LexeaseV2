@@ -53,7 +53,7 @@ export default function LexyChat() {
     } else if (messages.length === 0) {
       setMessages([welcomeMessage]);
     }
-  }, [initialPrompt, isHomePage, messages.length]);
+  }, [initialPrompt, isHomePage]);
 
   const scrollToBottom = useCallback(() => {
     const viewport = scrollAreaRef.current?.querySelector('div[data-radix-scroll-area-viewport]');
@@ -125,6 +125,7 @@ export default function LexyChat() {
   };
 
   const startRecognition = () => {
+    if (typeof window === 'undefined') return;
     if (recognitionRef.current) {
         recognitionRef.current.stop();
         return;
@@ -230,6 +231,7 @@ export default function LexyChat() {
         <div className="border-t p-4 bg-background/20 rounded-b-2xl">
             <form onSubmit={handleSubmit} className="flex gap-2">
               <Input
+                name="q"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask a question about Indian Law..."
@@ -248,5 +250,3 @@ export default function LexyChat() {
     </div>
   );
 }
-
-    

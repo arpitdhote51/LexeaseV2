@@ -109,6 +109,7 @@ export default function QAChat({ documentText, documentId }: QAChatProps) {
   };
 
   const startRecognition = () => {
+    if (typeof window === 'undefined') return;
     if (recognitionRef.current) {
         recognitionRef.current.stop();
         return;
@@ -243,6 +244,7 @@ export default function QAChat({ documentText, documentId }: QAChatProps) {
         <div className="border-t pt-4">
             <form onSubmit={handleSubmit} className="flex gap-2">
               <Input
+                name="q"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask a question about the document..."
@@ -262,5 +264,3 @@ export default function QAChat({ documentText, documentId }: QAChatProps) {
     </Card>
   );
 }
-
-    
