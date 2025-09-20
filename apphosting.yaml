@@ -5,6 +5,11 @@ runConfig:
 
 # Environment variables and secrets.
 env:
+  # Grant access to secrets in Cloud Secret Manager.
+  # See https://firebase.google.com/docs/app-hosting/configure#secret-parameters
+  - variable: GEMINI_API_KEY
+    secret: GEMINI_API_KEY
+
   # Configure environment variables.
   # See https://firebase.google.com/docs/app-hosting/configure#user-defined-environment
   - variable: NEXT_PUBLIC_FIREBASE_API_KEY
@@ -42,7 +47,3 @@ env:
     availability:
       - BUILD
       - RUNTIME
-  # Grant access to secrets in Cloud Secret Manager.
-  # See https://firebase.google.com/docs/app-hosting/configure#secret-parameters
-  - variable: GEMINI_API_KEY
-    secret: GEMINI_API_KEY
