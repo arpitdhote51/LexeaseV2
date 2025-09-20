@@ -1,4 +1,3 @@
-
 'use server';
 
 /**
@@ -11,7 +10,6 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import * as pdfjs from 'pdfjs-dist';
 import pdfParse from 'pdf-parse';
 import mammoth from 'mammoth';
 
@@ -53,31 +51,8 @@ const parseDocumentFlow = ai.defineFlow(
 
     try {
         if (mimeType === 'application/pdf') {
-            try {
-                // First attempt with pdfjs-dist, converting Buffer to Uint8Array as required
-                const uint8Array = new Uint8Array(buffer);
-                const pdfDoc = await pdfjs.getDocument({
-                    data: uint8Array,
-                    // Disable worker to avoid module errors in some server environments
-                    disableWorker: true, 
-                }).promise;
-
-                let textContent = '';
-                for (let i = 1; i <= pdfDoc.numPages; i++) {
-                    const page = await pdfDoc.getPage(i);
-                    const text = await page.getTextContent();
-                    textContent += text.items.map(item => ('str' in item ? item.str : '')).join(' ') + '\n';
-                }
-                documentText = textContent;
-                console.log("PDF parsed successfully with pdfjs-dist.");
-
-            } catch (pdfjsError) {
-                console.warn("pdfjs-dist failed, falling back to pdf-parse:", pdfjsError);
-                // Fallback to pdf-parse if pdfjs-dist fails
-                const data = await pdfParse(buffer);
-                documentText = data.text;
-                console.log("PDF parsed successfully with fallback pdf-parse.");
-            }
+            const data = await pdfParse(buffer);
+            documentText = data.text;
         } else if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
             const result = await mammoth.extractRawText({ buffer });
             documentText = result.value;
