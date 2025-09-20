@@ -24,8 +24,7 @@ import {
   RiskFlaggingOutput,
 } from "@/ai/flows/risk-flagging";
 import mammoth from "mammoth";
-// Important: Use the browser-compatible version of pdf-parse
-import pdf from "pdf-parse/lib/pdf-parse.js";
+import * as pdfjs from "pdfjs-dist";
 
 import SummaryDisplay from "./summary-display";
 import EntitiesDisplay from "./entities-display";
@@ -54,6 +53,11 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
   const [file, setFile] = useState<File | null>(null);
 
   const { toast } = useToast();
+  
+  useEffect(() => {
+    // Set workerSrc for pdfjs-dist. This is crucial for it to work with Next.js
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+  }, []);
 
   useEffect(() => {
     if (existingDocument) {
@@ -108,8 +112,16 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
         const arrayBuffer = await fileToProcess.arrayBuffer();
 
         if (fileToProcess.type === 'application/pdf') {
-            const data = await pdf(arrayBuffer);
-            text = data.text;
+            const loadingTask = pdfjs.getDocument(arrayBuffer);
+            const pdf = await loadingTask.promise;
+            let fullText = '';
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const textContent = await page.getTextContent();
+                const pageText = textContent.items.map(item => ('str' in item ? item.str : '')).join(' ');
+                fullText += pageText + '\n';
+            }
+            text = fullText;
         } else if (fileToProcess.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
             const result = await mammoth.extractRawText({ arrayBuffer });
             text = result.value;
