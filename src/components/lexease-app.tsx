@@ -34,8 +34,8 @@ import { Skeleton } from "./ui/skeleton";
 import type { DocumentData } from "@/lib/types";
 import Header from "./layout/header";
 
-// Set the workerSrc for pdf.js
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@4.2.67/build/pdf.worker.js`;
+// Set the workerSrc for pdf.js to a local file
+pdfjs.GlobalWorkerOptions.workerSrc = `/pdf.worker.js`;
 
 type UserRole = "layperson" | "lawStudent" | "lawyer";
 
