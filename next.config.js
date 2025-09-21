@@ -33,6 +33,12 @@ const nextConfig = {
   webpack: (config) => {
     // Required by pdfjs-dist
     config.externals.push('canvas');
+
+    // Copy the pdf.worker.min.js file to the public directory
+    config.resolve.alias['pdfjs-dist/build/pdf.worker.min.js'] = require.resolve(
+      'pdfjs-dist/build/pdf.worker.min.js'
+    );
+
     return config;
   },
 };

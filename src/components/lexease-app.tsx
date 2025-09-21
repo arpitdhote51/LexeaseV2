@@ -34,6 +34,9 @@ import { Skeleton } from "./ui/skeleton";
 import type { DocumentData } from "@/lib/types";
 import Header from "./layout/header";
 
+// Set the workerSrc for pdf.js
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+
 type UserRole = "layperson" | "lawStudent" | "lawyer";
 
 interface LexeaseAppProps {
@@ -53,12 +56,6 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
   const [file, setFile] = useState<File | null>(null);
 
   const { toast } = useToast();
-  
-  useEffect(() => {
-    // Set the workerSrc for pdf.js to use a CDN.
-    // This is the recommended approach for Next.js and other bundlers.
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
-  }, []);
   
   useEffect(() => {
     if (existingDocument) {
