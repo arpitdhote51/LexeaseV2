@@ -105,10 +105,7 @@ const draftDocumentFlow = ai.defineFlow(
     outputSchema: DraftDocumentOutputSchema,
   },
   async (input) => {
-    const {output} = await ai.generate({
-      prompt: draftingAgentPrompt,
-      input,
-    });
-    return output!;
+    const response = await draftingAgentPrompt(input);
+    return response.output!;
   }
 );

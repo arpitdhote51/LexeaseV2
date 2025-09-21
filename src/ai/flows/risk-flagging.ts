@@ -55,10 +55,7 @@ const riskFlaggingFlow = ai.defineFlow(
     outputSchema: RiskFlaggingOutputSchema,
   },
   async input => {
-    const {output} = await ai.generate({
-      prompt: riskFlaggingPrompt,
-      input,
-    });
-    return output!;
+    const response = await riskFlaggingPrompt(input);
+    return response.output!;
   }
 );
