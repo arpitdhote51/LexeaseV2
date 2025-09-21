@@ -55,8 +55,9 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
   const { toast } = useToast();
   
   useEffect(() => {
-    // Set the workerSrc for pdf.js. Using a specific version from a CDN for stability.
-    pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.js`;
+    // Set the workerSrc for pdf.js to use a CDN.
+    // This is the recommended approach for Next.js and other bundlers.
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
   }, []);
   
   useEffect(() => {
