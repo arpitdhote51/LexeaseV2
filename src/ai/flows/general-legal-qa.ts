@@ -69,8 +69,8 @@ const generalLegalQAFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await ai.generate({
-        prompt,
-        input
+      prompt,
+      input,
     });
     return output!;
   }
