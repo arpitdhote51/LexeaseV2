@@ -35,7 +35,7 @@ import type { DocumentData } from "@/lib/types";
 import Header from "./layout/header";
 
 // Set the workerSrc for pdf.js
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 type UserRole = "layperson" | "lawStudent" | "lawyer";
 
