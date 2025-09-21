@@ -9,7 +9,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "postinstall": "mkdir -p public && cp node_modules/pdfjs-dist/build/pdf.worker.mjs public/pdf.worker.js"
   },
   "dependencies": {
     "@genkit-ai/googleai": "1.8.0",
