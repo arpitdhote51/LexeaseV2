@@ -8,6 +8,6 @@ export const ai = genkit({
       apiVersion: 'v1',
     }),
   ],
-  model: 'googleai/gemini-1.5-flash-preview',
+  model: 'googleai/gemini-1.0-pro',
   enableTracingAndMetrics: true,
 });
