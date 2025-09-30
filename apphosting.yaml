@@ -2,6 +2,9 @@
 # See https://firebase.google.com/docs/app-hosting/configure#cloud-run
 runConfig:
   minInstances: 0
+  # Allow unauthenticated requests to the Cloud Run service.
+  # This makes the app publicly accessible.
+  ingress: open
 
 # Environment variables and secrets.
 env:
@@ -9,6 +12,9 @@ env:
   # See https://firebase.google.com/docs/app-hosting/configure#secret-parameters
   - variable: GEMINI_API_KEY
     secret: GEMINI_API_KEY
+    availability:
+      - BUILD
+      - RUNTIME
 
   # Configure environment variables.
   # See https://firebase.google.com/docs/app-hosting/configure#user-defined-environment
@@ -44,11 +50,6 @@ env:
       - RUNTIME
   - variable: NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
     value: "G-9T325DLBHR"
-    availability:
-      - BUILD
-      - RUNTIME
-variable: GEMINI_API_KEY
-    value: "AIzaSyDhXH5v9VknuSLZclH4NmQcL6ZZMNNTic0"
     availability:
       - BUILD
       - RUNTIME
