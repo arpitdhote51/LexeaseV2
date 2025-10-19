@@ -11,23 +11,35 @@ import { draftDocument } from "@/ai/flows/draft-document";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "./ui/skeleton";
 import jsPDF from 'jspdf';
+import { Input } from "./ui/input";
 
 export default function DraftingAgent() {
   const [documentType, setDocumentType] = useState("");
   const [language, setLanguage] = useState("English");
-  const [userInputs, setUserInputs] = useState("");
+  const [userInputs, setUserInputs] = useState({
+    party1Name: "",
+    party1Address: "",
+    party2Name: "",
+    party2Address: "",
+    agreementDetails: ""
+  });
   const [generatedDraft, setGeneratedDraft] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const templates = ["Agreement", "Bail", "Affidavit"];
+  const templates = ["Rent Agreement", "Sale Deed", "NDA", "Affidavit", "Power of Attorney", "MOU"];
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setUserInputs(prev => ({ ...prev, [name]: value }));
+  };
 
   const handleDraft = async () => {
-    if (!documentType || !userInputs) {
+    if (!documentType || !userInputs.party1Name || !userInputs.party2Name || !userInputs.agreementDetails) {
         toast({
             variant: "destructive",
             title: "Missing Information",
-            description: "Please select a document type and provide your details.",
+            description: "Please select a document type and fill in all required fields.",
         });
         return;
     }
@@ -37,7 +49,7 @@ export default function DraftingAgent() {
         const result = await draftDocument({
             documentType,
             language,
-            userInputs,
+            userInputs: JSON.stringify(userInputs), // Pass structured data
         });
         setGeneratedDraft(result.draftContent);
     } catch (error) {
@@ -63,8 +75,26 @@ export default function DraftingAgent() {
   };
   
   const handleDownloadPdf = () => {
-    const doc = new jsPDF();
-    doc.text(generatedDraft, 10, 10);
+    const doc = new jsPDF({
+      format: 'a4'
+    });
+    // Add custom font that supports a wider range of characters if needed
+    // doc.addFont(".../path-to-font.ttf", "CustomFont", "normal");
+    // doc.setFont("CustomFont");
+
+    const margin = 15;
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const textLines = doc.splitTextToSize(generatedDraft, doc.internal.pageSize.getWidth() - margin * 2);
+    
+    let cursor = margin;
+    textLines.forEach((line: string) => {
+        if (cursor > pageHeight - margin) {
+            doc.addPage();
+            cursor = margin;
+        }
+        doc.text(line, margin, cursor);
+        cursor += 7; // Line height
+    });
     doc.save(`${documentType.replace(/[\s/]/g, "_")}_${language}.pdf`);
   };
 
@@ -87,9 +117,7 @@ export default function DraftingAgent() {
                     <CardContent className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
-                                <Label htmlFor="document-type" className="flex items-center justify-between">
-                                    Document Type
-                                </Label>
+                                <Label htmlFor="document-type">Document Type</Label>
                                 <Select onValueChange={setDocumentType} value={documentType}>
                                     <SelectTrigger id="document-type">
                                         <SelectValue placeholder="Select a document..." />
@@ -117,14 +145,38 @@ export default function DraftingAgent() {
                                 </Select>
                             </div>
                         </div>
+
+                        <div className="space-y-4">
+                            <h3 className="text-sm font-medium text-muted-foreground">Party Details</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="party1Name">Party 1 Name</Label>
+                                    <Input id="party1Name" name="party1Name" value={userInputs.party1Name} onChange={handleInputChange} placeholder="e.g., John Doe" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="party2Name">Party 2 Name</Label>
+                                    <Input id="party2Name" name="party2Name" value={userInputs.party2Name} onChange={handleInputChange} placeholder="e.g., Jane Smith" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="party1Address">Party 1 Address</Label>
+                                    <Input id="party1Address" name="party1Address" value={userInputs.party1Address} onChange={handleInputChange} placeholder="Full address" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="party2Address">Party 2 Address</Label>
+                                    <Input id="party2Address" name="party2Address" value={userInputs.party2Address} onChange={handleInputChange} placeholder="Full address" />
+                                </div>
+                            </div>
+                        </div>
+
                         <div className="space-y-2">
-                             <Label htmlFor="user-inputs">Provide Details</Label>
+                             <Label htmlFor="agreementDetails">Key Details & Clauses</Label>
                              <Textarea
-                                id="user-inputs"
-                                placeholder="Enter all relevant details here. For example:&#10;- Name: John Doe, Age: 45, Address: 123 Main St, Anytown&#10;- Statement: I affirm that the information provided is true..."
-                                value={userInputs}
-                                onChange={(e) => setUserInputs(e.target.value)}
-                                rows={10}
+                                id="agreementDetails"
+                                name="agreementDetails"
+                                placeholder="Enter all other relevant details. For a rent agreement, this could be:&#10;- Rent Amount: Rs. 20,000 per month&#10;- Security Deposit: Rs. 50,000&#10;- Lease Term: 11 months, starting from 1st Jan 2024&#10;- Property Address: Flat 101, ABC Apartments, Mumbai..."
+                                value={userInputs.agreementDetails}
+                                onChange={handleInputChange}
+                                rows={8}
                              />
                         </div>
                          <Button onClick={handleDraft} disabled={isLoading || !documentType} className="w-full bg-accent text-white font-semibold py-3 rounded-lg hover:bg-accent/90">
@@ -145,12 +197,14 @@ export default function DraftingAgent() {
                                 <Skeleton className="h-4 w-3/4" />
                                 <Skeleton className="h-4 w-full" />
                                 <Skeleton className="h-4 w-full" />
+                                <Skeleton className="h-4 w-5/6" />
+                                <Skeleton className="h-4 w-full" />
                                 <Skeleton className="h-4 w-1/2" />
                              </div>
                         )}
                         {generatedDraft && (
                             <div className="space-y-4">
-                                <Textarea value={generatedDraft} readOnly rows={15} className="bg-background"/>
+                                <Textarea value={generatedDraft} readOnly rows={20} className="bg-background font-mono text-xs"/>
                                 <div className="flex gap-4">
                                      <Button onClick={handleDownloadTxt} variant="outline">Download .txt</Button>
                                      <Button onClick={handleDownloadPdf} variant="outline">Download .pdf</Button>

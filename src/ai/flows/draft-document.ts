@@ -13,9 +13,9 @@ import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
 const DraftDocumentInputSchema = z.object({
-  documentType: z.string().describe('The type of legal document to draft (e.g., "Simple Affidavit").'),
+  documentType: z.string().describe('The type of legal document to draft (e.g., "Simple Affidavit", "Rent Agreement").'),
   language: z.string().describe('The language for the draft (e.g., "English", "Hindi").'),
-  userInputs: z.string().describe('A string containing user-provided details to fill into the document.'),
+  userInputs: z.string().describe('A JSON string containing structured user-provided details like party names, addresses, and specific clauses.'),
 });
 export type DraftDocumentInput = z.infer<typeof DraftDocumentInputSchema>;
 
@@ -40,10 +40,10 @@ const findRelevantTemplates = ai.defineTool(
   async ({ documentType, language }) => {
     // This flow is now disabled as it requires credentials that are not available.
     // Returning a placeholder template.
-    console.warn("GCS template retrieval is disabled. Using a placeholder.");
+    console.warn("GCS template retrieval is disabled. Using placeholder templates.");
     
     // In a real scenario, you would need to configure Google Cloud credentials.
-    // For now, we return a simple, hardcoded template to allow the flow to complete.
+    // For now, we return simple, hardcoded templates to allow the flow to complete.
     if (documentType === 'Affidavit') {
         return { template: `
 BEFORE THE NOTARY PUBLIC AT [City]
@@ -62,6 +62,43 @@ Verified at [City] on this [Date] day of [Month], [Year] that the contents of th
 
 DEPONENT
 `};
+    } else if (documentType === 'Rent Agreement') {
+        return { template: `
+RENT AGREEMENT
+
+This Rent Agreement is made and executed on this [Date] day of [Month], [Year] at [City].
+
+BETWEEN:
+
+[Party 1 Name], residing at [Party 1 Address], hereinafter referred to as the "LANDLORD".
+
+AND
+
+[Party 2 Name], residing at [Party 2 Address], hereinafter referred to as the "TENANT".
+
+The Landlord is the absolute owner of the property located at [Property Address].
+
+The Landlord has agreed to let out the said property to the Tenant for a monthly rent of [Rent Amount].
+
+NOW, THIS AGREEMENT WITNESSETH AS FOLLOWS:
+1. The tenancy shall be for a period of [Lease Term].
+2. The Tenant has paid a security deposit of [Security Deposit Amount].
+[Add more user-provided details here]
+
+
+IN WITNESS WHEREOF, the parties have executed this agreement.
+
+WITNESSES:
+1.
+
+LANDLORD
+[Party 1 Name]
+
+2.
+
+TENANT
+[Party 2 Name]
+`};
     }
     
     return { template: `Template for ${documentType} in ${language} not found. Please provide details.` };
@@ -75,21 +112,23 @@ const draftingAgentPrompt = ai.definePrompt({
     tools: [findRelevantTemplates],
     output: { schema: DraftDocumentOutputSchema },
     prompt: `
-        You are an expert legal drafting assistant.
+        You are an expert legal drafting assistant for Indian law.
         Your task is to generate a formal legal document based on user-provided details.
 
         1. First, use the 'findRelevantTemplates' tool to retrieve the appropriate template for the requested document type and language.
-        2. Once you have the template, carefully integrate the user-provided details into it. Fill in all placeholders like [Name], [Age], [Address], [Degree/Certificate Type], [Registration Number], etc., with the information from the user's input. The user's input may not be structured, so intelligently extract the information.
-        3. Ensure the final document is coherent, complete, and professionally formatted based on the structure of the retrieved template.
+        2. Once you have the template, carefully integrate the user-provided details into it. The user has provided details in a structured JSON format.
+        3. Intelligently extract information from the JSON and fill in all placeholders in the template like [Name], [Age], [Address], [Party 1 Name], [Party 2 Address], [Rent Amount], etc.
+        4. If the user provides additional clauses or details, integrate them into the appropriate section of the document.
+        5. Ensure the final document is coherent, complete, and professionally formatted according to the structure of the retrieved template.
 
-        USER-PROVIDED DETAILS:
+        USER-PROVIDED DETAILS (JSON):
         ---
         Document Type: {{{documentType}}}
         Language: {{{language}}}
         Details: {{{userInputs}}}
         ---
 
-        Generate the final document in the requested language only. Do not add any extra explanations, headers, or conversational text.
+        Generate the final document in the requested language only. Do not add any extra explanations, headers, or conversational text. The output should be the raw text of the document.
     `,
 });
 
