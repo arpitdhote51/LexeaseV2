@@ -12,6 +12,8 @@ import { draftDocument } from "@/ai/flows/draft-document";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "./ui/skeleton";
 import jsPDF from 'jspdf';
+import { Document, Packer, Paragraph, PageSize } from 'docx';
+import { saveAs } from 'file-saver';
 import { Input } from "./ui/input";
 
 export default function DraftingAgent() {
@@ -28,7 +30,6 @@ export default function DraftingAgent() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  // Updated list of templates based on the PRD
   const templates = ["Rent Agreement", "Sale Deed", "Affidavit", "Bail Application", "Arbitration Form", "NDA", "Power of Attorney", "MOU"];
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -51,7 +52,7 @@ export default function DraftingAgent() {
         const result = await draftDocument({
             documentType,
             language,
-            userInputs: JSON.stringify(userInputs), // Pass structured data
+            userInputs: JSON.stringify(userInputs),
         });
         setGeneratedDraft(result.draftContent);
     } catch (error) {
@@ -96,6 +97,29 @@ export default function DraftingAgent() {
     });
     doc.save(`${documentType.replace(/[\s/]/g, "_")}_${language}.pdf`);
   };
+
+  const handleDownloadDocx = () => {
+    const doc = new Document({
+        sections: [{
+            properties: {
+                pageSize: {
+                    width: PageSize.A4.width,
+                    height: PageSize.A4.height,
+                    orientation: PageSize.A4.orientation,
+                },
+            },
+            children: generatedDraft.split('\n').map(text => new Paragraph({
+                text: text,
+                spacing: { after: 200 },
+            })),
+        }],
+    });
+
+    Packer.toBlob(doc).then(blob => {
+        saveAs(blob, `${documentType.replace(/[\s/]/g, "_")}_${language}.docx`);
+    });
+  };
+
 
   return (
     <main className="flex-1 p-10 overflow-y-auto">
@@ -207,6 +231,7 @@ export default function DraftingAgent() {
                                 <div className="flex gap-4">
                                      <Button onClick={handleDownloadTxt} variant="outline">Download .txt</Button>
                                      <Button onClick={handleDownloadPdf} variant="outline">Download .pdf</Button>
+                                     <Button onClick={handleDownloadDocx} variant="outline">Download .docx</Button>
                                 </div>
                             </div>
                         )}
