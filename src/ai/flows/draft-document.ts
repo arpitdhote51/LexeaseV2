@@ -24,11 +24,11 @@ const DraftDocumentOutputSchema = z.object({
 });
 export type DraftDocumentOutput = z.infer<typeof DraftDocumentOutputSchema>;
 
-// Tool to find relevant legal templates from GCS.
+// Tool to find relevant legal templates. In a real scenario, this would search a database or GCS.
 const findRelevantTemplates = ai.defineTool(
   {
     name: 'findRelevantTemplates',
-    description: 'Retrieves a template from Google Cloud Storage for a given legal document type.',
+    description: 'Retrieves a template for a given legal document type.',
     inputSchema: z.object({
       documentType: z.string().describe('The type of document to search for (e.g., "Affidavit").'),
       language: z.string().describe('The language of the template required.'),
@@ -38,14 +38,10 @@ const findRelevantTemplates = ai.defineTool(
     }),
   },
   async ({ documentType, language }) => {
-    // This flow is now disabled as it requires credentials that are not available.
-    // Returning a placeholder template.
-    console.warn("GCS template retrieval is disabled. Using placeholder templates.");
-    
-    // In a real scenario, you would need to configure Google Cloud credentials.
-    // For now, we return simple, hardcoded templates to allow the flow to complete.
-    if (documentType === 'Affidavit') {
-        return { template: `
+    // Placeholder templates based on PRD.
+    // This can be expanded to fetch from a file or a database.
+    const templates: Record<string, string> = {
+        'Affidavit': `
 BEFORE THE NOTARY PUBLIC AT [City]
 AFFIDAVIT
 
@@ -61,9 +57,8 @@ VERIFICATION
 Verified at [City] on this [Date] day of [Month], [Year] that the contents of the above affidavit are true and correct to the best of my knowledge and belief.
 
 DEPONENT
-`};
-    } else if (documentType === 'Rent Agreement') {
-        return { template: `
+`,
+        'Rent Agreement': `
 RENT AGREEMENT
 
 This Rent Agreement is made and executed on this [Date] day of [Month], [Year] at [City].
@@ -98,10 +93,10 @@ LANDLORD
 
 TENANT
 [Party 2 Name]
-`};
-    }
+`
+    };
     
-    return { template: `Template for ${documentType} in ${language} not found. Please provide details.` };
+    return { template: templates[documentType] || `Template for ${documentType} in ${language} not found. Please provide details.` };
   }
 );
 

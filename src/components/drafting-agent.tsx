@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -27,7 +28,8 @@ export default function DraftingAgent() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const templates = ["Rent Agreement", "Sale Deed", "NDA", "Affidavit", "Power of Attorney", "MOU"];
+  // Updated list of templates based on the PRD
+  const templates = ["Rent Agreement", "Sale Deed", "Affidavit", "Bail Application", "Arbitration Form", "NDA", "Power of Attorney", "MOU"];
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -39,7 +41,7 @@ export default function DraftingAgent() {
         toast({
             variant: "destructive",
             title: "Missing Information",
-            description: "Please select a document type and fill in all required fields.",
+            description: "Please select a document type and fill in all required party and detail fields.",
         });
         return;
     }
@@ -78,9 +80,6 @@ export default function DraftingAgent() {
     const doc = new jsPDF({
       format: 'a4'
     });
-    // Add custom font that supports a wider range of characters if needed
-    // doc.addFont(".../path-to-font.ttf", "CustomFont", "normal");
-    // doc.setFont("CustomFont");
 
     const margin = 15;
     const pageHeight = doc.internal.pageSize.getHeight();
@@ -103,7 +102,7 @@ export default function DraftingAgent() {
         <header className="mb-10">
             <h1 className="text-3xl font-bold text-primary">AI Legal Drafting Agent</h1>
             <p className="text-muted-foreground mt-1">
-                Generate precise, jurisdiction-compliant Indian legal documents.
+                Generate precise, jurisdiction-compliant legal documents through voice or text.
             </p>
         </header>
 
@@ -150,12 +149,12 @@ export default function DraftingAgent() {
                             <h3 className="text-sm font-medium text-muted-foreground">Party Details</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="party1Name">Party 1 Name</Label>
-                                    <Input id="party1Name" name="party1Name" value={userInputs.party1Name} onChange={handleInputChange} placeholder="e.g., John Doe" />
+                                    <Label htmlFor="party1Name">Party 1 Name (e.g., Landlord/Seller)</Label>
+                                    <Input id="party1Name" name="party1Name" value={userInputs.party1Name} onChange={handleInputChange} placeholder="e.g., Suresh Patil" />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="party2Name">Party 2 Name</Label>
-                                    <Input id="party2Name" name="party2Name" value={userInputs.party2Name} onChange={handleInputChange} placeholder="e.g., Jane Smith" />
+                                    <Label htmlFor="party2Name">Party 2 Name (e.g., Tenant/Buyer)</Label>
+                                    <Input id="party2Name" name="party2Name" value={userInputs.party2Name} onChange={handleInputChange} placeholder="e.g., Arpit Dhote" />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="party1Address">Party 1 Address</Label>
@@ -169,11 +168,11 @@ export default function DraftingAgent() {
                         </div>
 
                         <div className="space-y-2">
-                             <Label htmlFor="agreementDetails">Key Details & Clauses</Label>
+                             <Label htmlFor="agreementDetails">Key Details & Custom Clauses</Label>
                              <Textarea
                                 id="agreementDetails"
                                 name="agreementDetails"
-                                placeholder="Enter all other relevant details. For a rent agreement, this could be:&#10;- Rent Amount: Rs. 20,000 per month&#10;- Security Deposit: Rs. 50,000&#10;- Lease Term: 11 months, starting from 1st Jan 2024&#10;- Property Address: Flat 101, ABC Apartments, Mumbai..."
+                                placeholder="Enter all other relevant details, line by line. For a rent agreement, this could be:&#10;- Rent Amount: Rs. 12,000 per month&#10;- Security Deposit: Rs. 50,000&#10;- Lease Term: 11 months, starting from 1st Jan 2024&#10;- Property Address: Flat 101, ABC Apartments, Mumbai..."
                                 value={userInputs.agreementDetails}
                                 onChange={handleInputChange}
                                 rows={8}
@@ -189,7 +188,7 @@ export default function DraftingAgent() {
                  <Card className="bg-white shadow-none border-border h-full">
                     <CardHeader>
                         <CardTitle>Generated Draft</CardTitle>
-                        <CardDescription>Review the AI-generated draft below.</CardDescription>
+                        <CardDescription>Review the AI-generated draft below. You can edit it before downloading.</CardDescription>
                     </CardHeader>
                     <CardContent>
                         {isLoading && (
@@ -204,7 +203,7 @@ export default function DraftingAgent() {
                         )}
                         {generatedDraft && (
                             <div className="space-y-4">
-                                <Textarea value={generatedDraft} readOnly rows={20} className="bg-background font-mono text-xs"/>
+                                <Textarea value={generatedDraft} onChange={(e) => setGeneratedDraft(e.target.value)} rows={20} className="bg-background font-mono text-xs"/>
                                 <div className="flex gap-4">
                                      <Button onClick={handleDownloadTxt} variant="outline">Download .txt</Button>
                                      <Button onClick={handleDownloadPdf} variant="outline">Download .pdf</Button>
