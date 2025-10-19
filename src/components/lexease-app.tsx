@@ -34,9 +34,6 @@ import { Skeleton } from "./ui/skeleton";
 import type { DocumentData } from "@/lib/types";
 import Header from "./layout/header";
 
-// Set the workerSrc for pdf.js to a local file
-GlobalWorkerOptions.workerSrc = `/pdf.worker.js`;
-
 type UserRole = "layperson" | "lawStudent" | "lawyer";
 
 interface LexeaseAppProps {
@@ -57,6 +54,11 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
 
   const { toast } = useToast();
   
+  useEffect(() => {
+    // Set the workerSrc for pdf.js only on the client side
+    GlobalWorkerOptions.workerSrc = `/pdf.worker.js`;
+  }, []);
+
   useEffect(() => {
     if (existingDocument) {
       setDocumentText(existingDocument.documentDataUri); // Assuming documentDataUri is actually text for old data
@@ -366,5 +368,3 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
     </>
   );
 }
-
-    
