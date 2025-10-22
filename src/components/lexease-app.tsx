@@ -128,7 +128,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
             text = await fileToProcess.text();
         }
         setDocumentText(text);
-    } catch (error) => {
+    } catch (error) {
         console.error('File parsing failed:', error);
         toast({
             variant: 'destructive',
