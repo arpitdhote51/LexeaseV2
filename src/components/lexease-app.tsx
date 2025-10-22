@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
+import * as pdfjs from "pdfjs-dist";
 import mammoth from "mammoth";
 import {
   plainLanguageSummarization,
@@ -56,7 +56,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
   
   useEffect(() => {
     // Set the workerSrc for pdf.js only on the client side
-    GlobalWorkerOptions.workerSrc = `/pdf.worker.js`;
+    pdfjs.GlobalWorkerOptions.workerSrc = `/pdf.worker.js`;
   }, []);
 
   useEffect(() => {
@@ -111,7 +111,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
         let text = '';
         if (fileToProcess.type === 'application/pdf') {
             const arrayBuffer = await fileToProcess.arrayBuffer();
-            const pdf = await getDocument(arrayBuffer).promise;
+            const pdf = await pdfjs.getDocument(arrayBuffer).promise;
             let extractedText = '';
             for (let i = 1; i <= pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
