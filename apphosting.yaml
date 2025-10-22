@@ -2,6 +2,7 @@
 # See https://firebase.google.com/docs/app-hosting/configure#cloud-run
 runConfig:
   minInstances: 0
+  maxInstances: 10
   # Allow unauthenticated requests to the Cloud Run service.
   # This makes the app publicly accessible.
   ingress: open
