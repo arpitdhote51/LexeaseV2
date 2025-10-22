@@ -7,10 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Send, Bot, Mic, Volume2, Loader2 } from "lucide-react";
+import { Send, Bot, Mic, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { generalLegalQA } from "@/ai/flows/general-legal-qa";
-import { textToSpeech } from "@/ai/flows/text-to-speech";
 
 interface Message {
   id?: string;
@@ -28,11 +27,8 @@ export default function LexyChat() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const [isRecognizing, setIsRecognizing] = useState(false);
-  const [audioPlaying, setAudioPlaying] = useState<string | null>(null);
-  const [audioLoading, setAudioLoading] = useState<string | null>(null);
   const recognitionRef = useRef<any>(null);
 
   const isHomePage = pathname === '/';
@@ -100,30 +96,6 @@ export default function LexyChat() {
     await fetchAnswer(currentInput, newMessages);
   };
   
-  const handlePlayAudio = async (text: string, messageId: string) => {
-    if (audioPlaying === messageId) {
-        audioRef.current?.pause();
-        setAudioPlaying(null);
-        return;
-    }
-    
-    setAudioLoading(messageId);
-    try {
-        const { audioDataUri } = await textToSpeech({ text });
-        if (audioRef.current) {
-            audioRef.current.src = audioDataUri;
-            audioRef.current.play();
-            setAudioPlaying(messageId);
-            audioRef.current.onended = () => setAudioPlaying(null);
-        }
-    } catch (error) {
-        console.error("TTS failed:", error);
-        toast({ variant: "destructive", title: "Audio Playback Failed" });
-    } finally {
-        setAudioLoading(null);
-    }
-  };
-
   const startRecognition = () => {
     if (typeof window === 'undefined') return;
     if (recognitionRef.current) {
@@ -195,17 +167,6 @@ export default function LexyChat() {
                   }`}
                 >
                   <p className="whitespace-pre-wrap font-body leading-relaxed">{message.content}</p>
-                   {message.role === "assistant" && message.id !== 'welcome-msg' && (
-                     <Button
-                        variant="ghost"
-                        size="icon"
-                        className="absolute -bottom-2 -right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => handlePlayAudio(message.content, message.id!)}
-                        disabled={audioLoading !== null}
-                    >
-                       {audioLoading === message.id ? <Loader2 className="animate-spin" /> : <Volume2 size={16} />}
-                    </Button>
-                   )}
                 </div>
                  {message.role === "user" && (
                   <Avatar className="h-8 w-8 bg-muted text-muted-foreground">
@@ -246,7 +207,6 @@ export default function LexyChat() {
               </Button>
             </form>
         </div>
-        <audio ref={audioRef} className="hidden" />
     </div>
   );
 }
