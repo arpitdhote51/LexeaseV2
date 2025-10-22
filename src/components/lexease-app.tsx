@@ -33,6 +33,7 @@ import QAChat from "./qa-chat";
 import { Skeleton } from "./ui/skeleton";
 import type { DocumentData } from "@/lib/types";
 import Header from "./layout/header";
+import GoogleDrivePicker from "./google-drive-picker";
 
 type UserRole = "layperson" | "lawStudent" | "lawyer";
 
@@ -56,7 +57,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
   
   useEffect(() => {
     // Set the workerSrc for pdf.js only on the client side
-    pdfjs.GlobalWorkerOptions.workerSrc = `/pdf.worker.js`;
+    pdfjs.GlobalWorkerOptions.workerSrc = `/pdf.worker.mjs`;
   }, []);
 
   useEffect(() => {
@@ -127,7 +128,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
             text = await fileToProcess.text();
         }
         setDocumentText(text);
-    } catch (error) {
+    } catch (error) => {
         console.error('File parsing failed:', error);
         toast({
             variant: 'destructive',
@@ -222,7 +223,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
             </CardHeader>
             <CardContent className="space-y-6">
                <div
-                className={`relative flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-xl bg-background  ${!existingDocument ? 'cursor-pointer hover:bg-gray-100' : 'cursor-not-allowed'}`}
+                className={`relative flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl bg-background  ${!existingDocument ? 'cursor-pointer hover:bg-gray-100' : 'cursor-not-allowed'}`}
                 onDrop={onDrop}
                 onDragOver={onDragOver}
                 >
@@ -272,6 +273,14 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
                     </label>
                 )}
                 </div>
+                
+                <div className="relative flex items-center">
+                  <div className="flex-grow border-t border-muted"></div>
+                  <span className="flex-shrink mx-4 text-xs font-semibold text-muted-foreground">OR</span>
+                  <div className="flex-grow border-t border-muted"></div>
+                </div>
+
+                <GoogleDrivePicker onFilePicked={processFile} />
 
               <div className="space-y-4">
                 <Label className="font-semibold text-foreground">Select Your Role</Label>
