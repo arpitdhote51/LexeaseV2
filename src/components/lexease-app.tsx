@@ -34,6 +34,7 @@ import { Skeleton } from "./ui/skeleton";
 import type { DocumentData } from "@/lib/types";
 import Header from "./layout/header";
 import GoogleDrivePicker from "./google-drive-picker";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 
 type UserRole = "layperson" | "lawStudent" | "lawyer";
 
