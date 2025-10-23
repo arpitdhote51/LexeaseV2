@@ -3,9 +3,6 @@
 runConfig:
   minInstances: 0
   maxInstances: 10
-  # Allow unauthenticated requests to the Cloud Run service.
-  # This makes the app publicly accessible.
-  ingress: open
 
 # Environment variables and secrets.
 env:
