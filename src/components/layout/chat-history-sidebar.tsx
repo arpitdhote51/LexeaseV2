@@ -6,11 +6,27 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Moon, Sun, Monitor } from "lucide-react";
 
 
 export default function ChatHistorySidebar() {
   const router = useRouter();
   const pathname = usePathname();
+  const [theme, setTheme] = useState('light');
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    setTheme(savedTheme);
+    document.documentElement.className = savedTheme;
+  }, []);
+
+  const handleThemeChange = (newTheme: string) => {
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+    document.documentElement.className = newTheme;
+  };
 
   const handleNewAnalysis = () => {
     router.push("/new");
@@ -30,7 +46,7 @@ export default function ChatHistorySidebar() {
   ];
 
   return (
-    <aside className="w-64 bg-white border-r border-border flex flex-col">
+    <aside className="w-64 bg-card border-r border-border flex flex-col">
       <div className="px-6 py-5 border-b border-border flex justify-between items-center">
         <Link href="/">
           <h1 className="text-xl font-bold text-primary">LexEase</h1>
@@ -58,6 +74,33 @@ export default function ChatHistorySidebar() {
             ))}
         </nav>
       </ScrollArea>
+
+      <div className="p-4 mt-auto border-t border-border space-y-4">
+        <div>
+            <label className="text-xs font-semibold text-muted-foreground mb-2 block px-2">Theme</label>
+            <Select onValueChange={handleThemeChange} value={theme}>
+                <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select theme" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="light"><div className="flex items-center gap-2"><Sun className="h-4 w-4"/> Light</div></SelectItem>
+                    <SelectItem value="dark"><div className="flex items-center gap-2"><Moon className="h-4 w-4"/> Dark</div></SelectItem>
+                </SelectContent>
+            </Select>
+        </div>
+         <div>
+            <label className="text-xs font-semibold text-muted-foreground mb-2 block px-2">Language</label>
+            <Select defaultValue="en">
+                <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select language" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="en">English</SelectItem>
+                    <SelectItem value="hi">Hindi</SelectItem>
+                </SelectContent>
+            </Select>
+        </div>
+      </div>
     </aside>
   );
 }

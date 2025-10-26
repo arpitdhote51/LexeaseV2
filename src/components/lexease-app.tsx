@@ -196,12 +196,12 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
   
   const onDrop = useCallback((event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
-    if(existingDocument || isLoading || isParsing) return;
+    if(existingDocument || isLoading || isParsing || analysisResult) return;
     const files = event.dataTransfer.files;
     if (files && files.length > 0) {
       processFile(files[0]);
     }
-  }, [existingDocument, isLoading, isParsing]);
+  }, [existingDocument, isLoading, isParsing, analysisResult]);
 
   const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -215,7 +215,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         { !existingDocument && (
         <div className="lg:col-span-5">
-          <Card className="sticky top-8 bg-white shadow-none border-border">
+          <Card className="sticky top-8 bg-card shadow-none border-border">
             <CardHeader>
               <CardTitle className="font-bold text-2xl text-foreground">Document Input</CardTitle>
               <CardDescription>
@@ -224,7 +224,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
             </CardHeader>
             <CardContent className="space-y-6">
                <div
-                className={`relative flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl bg-background  ${!existingDocument ? 'cursor-pointer hover:bg-gray-100' : 'cursor-not-allowed'}`}
+                className={`relative flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl bg-background  ${!existingDocument && !analysisResult ? 'cursor-pointer hover:bg-muted/50' : 'cursor-not-allowed'}`}
                 onDrop={onDrop}
                 onDragOver={onDragOver}
                 >
@@ -234,7 +234,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
                     className="sr-only"
                     onChange={handleFileChange}
                     accept=".pdf,.docx,.txt"
-                    disabled={isLoading || !!existingDocument || isParsing}
+                    disabled={isLoading || !!existingDocument || isParsing || !!analysisResult}
                 />
                 {isParsing ? (
                     <div className="text-center p-4">
@@ -263,7 +263,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
                         )}
                     </div>
                 ) : (
-                    <label htmlFor="file-upload" className={`w-full h-full flex flex-col items-center justify-center text-center ${!existingDocument ? 'cursor-pointer' : 'cursor-not-allowed'}`}>
+                    <label htmlFor="file-upload" className={`w-full h-full flex flex-col items-center justify-center text-center ${!existingDocument && !analysisResult ? 'cursor-pointer' : 'cursor-not-allowed'}`}>
                         <FileUp className="h-12 w-12 text-muted-foreground" />
                         <p className="mt-4 text-sm font-semibold text-foreground">
                             Drag & drop or click to upload
@@ -290,7 +290,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
                   className="flex flex-col sm:flex-row gap-4"
                   value={userRole}
                   onValueChange={(value: UserRole) => setUserRole(value)}
-                  disabled={isLoading || !!existingDocument || isParsing}
+                  disabled={isLoading || !!existingDocument || isParsing || !!analysisResult}
                 >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="layperson" id="r1" />
@@ -307,7 +307,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
                 </RadioGroup>
               </div>
               <Button onClick={handleAnalyze} disabled={isLoading || isParsing || !file || !!analysisResult || !documentText} className="w-full bg-accent text-white font-semibold py-3 rounded-lg hover:bg-accent/90">
-                {isLoading && !analysisResult ? (
+                {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Analyzing...
@@ -319,7 +319,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
         </div>
         )}
         <div className={existingDocument ? "lg:col-span-12" : "lg:col-span-7"}>
-          <Card className="bg-white shadow-none border-border">
+          <Card className="bg-card shadow-none border-border">
             <CardHeader>
               <CardTitle className="font-bold text-2xl text-foreground">
                 { file ? file.name : "Analysis Results" }
