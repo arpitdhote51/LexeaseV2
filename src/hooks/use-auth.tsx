@@ -23,7 +23,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    const auth = getAuth(app);
+    // Explicitly pass the app instance to getAuth()
+    const auth = getAuth(app); 
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
