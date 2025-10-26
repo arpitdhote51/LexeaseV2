@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import Link from "next/link";
 
 const GoogleIcon = () => (
     <svg className="mr-3 h-5 w-5" viewBox="0 0 24 24">
@@ -56,20 +57,6 @@ export default function LoginPage() {
             });
         }
     };
-    
-    const handleGuest = () => {
-        // Since we are not creating an anonymous user, we just redirect.
-        // The AuthWrapper in layout will see there is no user, but will allow access to non-protected routes
-        // For guest access to protected routes, we would need anonymous sign-in.
-        // For now, we just redirect to the main page, which will then redirect back to login if user is not set.
-        // To truly support guests, the AuthWrapper logic needs to be more nuanced.
-        // Let's assume for now "Continue as Guest" just means they can see the homepage.
-        toast({
-            title: "Guest Mode",
-            description: "You are continuing as a guest. Your data will not be saved.",
-        });
-        router.push("/");
-    };
 
     if (loading || user) {
         return (
@@ -105,8 +92,8 @@ export default function LoginPage() {
                         <div className="flex-grow border-t border-muted"></div>
                     </div>
 
-                    <Button onClick={() => router.push('/')} variant="secondary" className="w-full text-base py-6">
-                        Continue as Guest
+                    <Button asChild variant="secondary" className="w-full text-base py-6">
+                        <Link href="/">Continue as Guest</Link>
                     </Button>
 
                     <p className="text-xs text-muted-foreground text-center px-4 pt-4">

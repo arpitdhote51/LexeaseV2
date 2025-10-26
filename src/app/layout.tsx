@@ -18,6 +18,8 @@ const AuthWrapper = ({ children }: { children: ReactNode }) => {
     const router = useRouter();
     const pathname = usePathname();
 
+    const unprotectedRoutes = ['/login', '/'];
+
     useEffect(() => {
         const auth = getAuth(app);
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -28,12 +30,12 @@ const AuthWrapper = ({ children }: { children: ReactNode }) => {
     }, []);
 
     useEffect(() => {
-        if (!loading && !user && pathname !== '/login') {
+        if (!loading && !user && !unprotectedRoutes.includes(pathname)) {
             router.replace('/login');
         }
     }, [user, loading, router, pathname]);
 
-    if (loading || (!user && pathname !== '/login')) {
+    if (loading || (!user && !unprotectedRoutes.includes(pathname))) {
         return (
             <div className="flex h-screen w-full items-center justify-center bg-background">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
