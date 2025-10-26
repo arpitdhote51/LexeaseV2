@@ -81,7 +81,6 @@ export default function LoginPage() {
                             Sign in with Google
                         </Button>
                          <Button onClick={handleGoogleSignIn} className="w-full text-base py-6">
-                            <GoogleIcon />
                             Sign up with Google
                         </Button>
                     </div>
@@ -95,13 +94,12 @@ export default function LoginPage() {
                     <Button asChild variant="secondary" className="w-full text-base py-6">
                         <Link href="/">Continue as Guest</Link>
                     </Button>
-
-                    <p className="text-xs text-muted-foreground text-center px-4 pt-4">
-                        By continuing, you agree to our Terms of Service and Privacy Policy.
-                    </p>
                 </CardContent>
                  <CardFooter className="flex flex-col items-center justify-center pb-6">
-                    <p className="text-xs font-semibold text-muted-foreground text-center">
+                    <p className="text-xs text-muted-foreground text-center px-4">
+                        By continuing, you agree to our Terms of Service and Privacy Policy.
+                    </p>
+                    <p className="text-sm font-bold text-foreground text-center mt-6">
                         Project by team CryptoCrew : GenAI Exchange Hackathon 2025
                     </p>
                 </CardFooter>
