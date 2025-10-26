@@ -13,10 +13,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAuth } from "@/hooks/use-auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { getAuth, signOut } from "firebase/auth";
+import { getAuth, signOut, onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
+import { app } from "@/lib/firebase";
 
 const features = [
   {
@@ -52,9 +52,16 @@ const features = [
 ];
 
 export default function HomePage() {
-  const { user, loading } = useAuth();
+  const [user, setUser] = useState<FirebaseUser | null>(null);
   const [theme, setTheme] = useState('light');
-  const auth = getAuth();
+  const auth = getAuth(app);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, [auth]);
 
   useEffect(() => {
     const savedTheme = typeof window !== 'undefined' ? localStorage.getItem('theme') || 'light' : 'light';
@@ -235,5 +242,3 @@ export default function HomePage() {
     </div>
   );
 }
-
-    

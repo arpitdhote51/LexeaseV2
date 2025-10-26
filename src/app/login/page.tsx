@@ -1,15 +1,14 @@
 
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { useAuth } from "@/hooks/use-auth";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, User } from "firebase/auth";
+import { app } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import Image from "next/image";
 
 const GoogleIcon = () => (
     <svg className="mr-3 h-5 w-5" viewBox="0 0 24 24">
@@ -22,18 +21,24 @@ const GoogleIcon = () => (
 
 
 export default function LoginPage() {
-    const { user, loading } = useAuth();
+    const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);
     const router = useRouter();
     const { toast } = useToast();
+    const auth = getAuth(app);
 
     useEffect(() => {
-        if (!loading && user) {
-            router.replace("/");
-        }
-    }, [user, loading, router]);
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+            setLoading(false);
+            if (currentUser) {
+                router.replace("/");
+            }
+        });
+        return () => unsubscribe();
+    }, [auth, router]);
     
     const handleGoogleSignIn = async () => {
-        const auth = getAuth();
         const provider = new GoogleAuthProvider();
         try {
             await signInWithPopup(auth, provider);
@@ -53,11 +58,17 @@ export default function LoginPage() {
     };
     
     const handleGuest = () => {
+        // Since we are not creating an anonymous user, we just redirect.
+        // The AuthWrapper in layout will see there is no user, but will allow access to non-protected routes
+        // For guest access to protected routes, we would need anonymous sign-in.
+        // For now, we just redirect to the main page, which will then redirect back to login if user is not set.
+        // To truly support guests, the AuthWrapper logic needs to be more nuanced.
+        // Let's assume for now "Continue as Guest" just means they can see the homepage.
         toast({
             title: "Guest Mode",
             description: "You are continuing as a guest. Your data will not be saved.",
         });
-         router.push("/");
+        router.push("/");
     };
 
     if (loading || user) {
@@ -94,7 +105,7 @@ export default function LoginPage() {
                         <div className="flex-grow border-t border-muted"></div>
                     </div>
 
-                    <Button onClick={handleGuest} variant="secondary" className="w-full text-base py-6">
+                    <Button onClick={() => router.push('/')} variant="secondary" className="w-full text-base py-6">
                         Continue as Guest
                     </Button>
 

@@ -8,61 +8,51 @@ let auth: Auth;
 let db: Firestore;
 let analytics: Analytics | undefined = undefined;
 
-// Dynamically construct the configuration from environment variables
+// Hardcode the configuration for reliability on the client-side
 const firebaseConfig = {
-    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-    measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+    apiKey: "AIzaSyDcFJTJnGLI-uVStqI8uuQVcQMY34ilMJg",
+    authDomain: "studio-7376954909-7abc4.firebaseapp.com",
+    projectId: "studio-7376954909-7abc4",
+    storageBucket: "studio-7376954909-7abc4.appspot.com",
+    messagingSenderId: "131083878984",
+    appId: "1:131083878984:web:0b73c0919373959b85c2c5",
+    measurementId: "G-9T325DLBHR"
 };
 
 // Initialize Firebase on the client side
 if (typeof window !== 'undefined') {
     if (!getApps().length) {
-        // Ensure all config values are present before initializing
-        if (
-            firebaseConfig.apiKey &&
-            firebaseConfig.authDomain &&
-            firebaseConfig.projectId &&
-            firebaseConfig.storageBucket &&
-            firebaseConfig.messagingSenderId &&
-            firebaseConfig.appId
-        ) {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            try {
-                db = initializeFirestore(app, {
-                    localCache: persistentLocalCache({})
-                });
-            } catch (e) {
-                // Firestore can only be initialized once
-                db = getFirestore(app);
-            }
-            if (firebaseConfig.measurementId) {
-                try {
-                    analytics = getAnalytics(app);
-                } catch(e) {
-                    console.error("Failed to initialize Analytics", e);
-                }
-            }
-        } else {
-            console.error("Firebase configuration is missing or incomplete. Check your environment variables.");
-        }
+        app = initializeApp(firebaseConfig);
     } else {
         app = getApp();
-        auth = getAuth(app);
+    }
+    
+    auth = getAuth(app);
+    
+    try {
+        db = initializeFirestore(app, {
+            localCache: persistentLocalCache({})
+        });
+    } catch (e) {
         db = getFirestore(app);
-        if (firebaseConfig.measurementId) {
-            try {
-                analytics = getAnalytics(app);
-            } catch(e) {
-                 console.error("Failed to re-initialize Analytics", e);
-            }
+    }
+    
+    if (firebaseConfig.measurementId) {
+        try {
+            analytics = getAnalytics(app);
+        } catch(e) {
+            console.error("Failed to initialize Analytics", e);
         }
     }
+} else {
+    // Handle server-side initialization if necessary, though this app is client-focused
+    if (!getApps().length) {
+         app = initializeApp(firebaseConfig);
+    } else {
+        app = getApp();
+    }
+    auth = getAuth(app);
+    db = getFirestore(app);
 }
 
 // Export the initialized instances
