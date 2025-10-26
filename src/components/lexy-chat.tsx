@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Send, Bot, Mic, Loader2 } from "lucide-react";
+import { Send, Bot, Mic } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { generalLegalQA } from "@/ai/flows/general-legal-qa";
 
@@ -144,7 +144,7 @@ export default function LexyChat() {
   };
 
   return (
-    <div className={`w-full flex flex-col bg-white/50 shadow-lg rounded-2xl border border-border/50 backdrop-blur-sm h-full`}>
+    <div className={`w-full flex flex-col bg-card shadow-lg rounded-2xl border border-border/50 backdrop-blur-sm h-full`}>
         <ScrollArea className="flex-1 p-6" ref={scrollAreaRef}>
           <div className="space-y-6">
             {messages.map((message) => (
@@ -163,7 +163,7 @@ export default function LexyChat() {
                   className={`rounded-lg px-4 py-3 max-w-2xl text-sm shadow-md relative group ${
                     message.role === "user"
                       ? "bg-primary text-primary-foreground"
-                      : "bg-background/80"
+                      : "bg-background/80 text-foreground"
                   }`}
                 >
                   <p className="whitespace-pre-wrap font-body leading-relaxed">{message.content}</p>
@@ -202,7 +202,7 @@ export default function LexyChat() {
                <Button type="button" variant={isRecognizing ? "destructive" : "outline"} size="icon" onClick={startRecognition} disabled={isLoading} className="h-12 w-12">
                   <Mic className="h-5 w-5" />
               </Button>
-              <Button type="submit" disabled={isLoading || !input.trim()} className="bg-accent hover:bg-accent/90 h-12 px-6">
+              <Button type="submit" disabled={isLoading || !input.trim()} className="bg-primary hover:bg-primary/90 h-12 px-6">
                 <Send className="h-5 w-5" />
               </Button>
             </form>

@@ -1,10 +1,18 @@
 
+"use client";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, Scale, Search, FileText, Languages, Shield, ArrowRight } from "lucide-react";
+import { BookOpen, Scale, Search, FileText, Languages, Shield, ArrowRight, Moon, Sun, Monitor } from "lucide-react";
 import LexyChat from "@/components/lexy-chat";
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const features = [
   {
@@ -40,13 +48,27 @@ const features = [
 ];
 
 export default function HomePage() {
+  const [theme, setTheme] = useState('light');
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    setTheme(savedTheme);
+    document.documentElement.className = savedTheme;
+  }, []);
+
+  const handleThemeChange = (newTheme: string) => {
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+    document.documentElement.className = newTheme;
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground font-body">
       <header className="px-4 lg:px-6 h-14 flex items-center bg-card border-b text-card-foreground">
         <Link href="/" className="flex items-center justify-center" prefetch={false}>
           <h1 className="text-2xl font-bold text-primary font-headline">LexEase</h1>
         </Link>
-        <nav className="ml-auto flex gap-4 sm:gap-6">
+        <nav className="ml-auto flex items-center gap-4 sm:gap-6">
           <Link href="/new" className="text-sm font-medium hover:underline underline-offset-4 text-foreground" prefetch={false}>
             Start Analysis
           </Link>
@@ -56,6 +78,27 @@ export default function HomePage() {
           <Link href="/about" className="text-sm font-medium hover:underline underline-offset-4 text-foreground" prefetch={false}>
             About
           </Link>
+          
+          <div className="flex items-center gap-2">
+            <Select onValueChange={handleThemeChange} value={theme}>
+                <SelectTrigger className="w-[100px] h-8 text-xs">
+                    <SelectValue placeholder="Theme" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="light"><div className="flex items-center gap-2"><Sun className="h-4 w-4"/> Light</div></SelectItem>
+                    <SelectItem value="dark"><div className="flex items-center gap-2"><Moon className="h-4 w-4"/> Dark</div></SelectItem>
+                </SelectContent>
+            </Select>
+            <Select defaultValue="en">
+                <SelectTrigger className="w-[100px] h-8 text-xs">
+                    <SelectValue placeholder="Language" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="en">English</SelectItem>
+                    <SelectItem value="hi">Hindi</SelectItem>
+                </SelectContent>
+            </Select>
+          </div>
         </nav>
       </header>
 
@@ -64,10 +107,10 @@ export default function HomePage() {
           <div className="container px-4 md:px-6 flex flex-col items-center text-center">
             <div className="space-y-4 max-w-3xl">
               <h1 className="text-4xl font-bold tracking-tighter text-primary sm:text-5xl xl:text-6xl/none font-headline">
-                Your AI-Powered Legal Co-Pilot for Modern India
+                Your AI-Powered Co-Pilot for Modern India
               </h1>
               <p className="text-muted-foreground md:text-xl">
-                LexEase is a highly capable AI legal assistant. Ask Lexy anything below.
+                LexEase is a highly capable AI assistant. Ask Lexy anything below.
               </p>
             </div>
             <div className="w-full max-w-4xl mt-10 h-[500px]">
@@ -128,9 +171,9 @@ export default function HomePage() {
               </p>
             </div>
             <div className="mx-auto w-full max-w-sm space-y-2">
-              <Button asChild size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90">
-                <Link href="/draft">
-                  Draft a New Document
+               <Button asChild size="lg" className="bg-primary hover:bg-primary/90">
+                <Link href="/new">
+                  Start for Free
                 </Link>
               </Button>
             </div>

@@ -54,7 +54,7 @@ export default function ChatHistorySidebar() {
       </div>
 
       <div className="p-4 space-y-2">
-        <Button onClick={handleNewAnalysis} className="w-full bg-accent text-white font-semibold rounded-lg hover:bg-accent/90">
+        <Button onClick={handleNewAnalysis} className="w-full bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90">
             <span className="material-symbols-outlined mr-2">add</span>
             New Analysis
         </Button>
@@ -67,7 +67,7 @@ export default function ChatHistorySidebar() {
       <ScrollArea className="flex-1">
         <nav className="p-4 pt-0 space-y-2">
             {navLinks.map(link => (
-              <Link key={link.href} href={link.href} className={`flex items-center gap-3 px-4 py-2.5 rounded-md font-medium text-sm ${pathname === link.href ? 'bg-background text-accent' : 'text-muted-foreground hover:bg-background hover:text-foreground'}`}>
+              <Link key={link.href} href={link.href} className={`flex items-center gap-3 px-4 py-2.5 rounded-md font-medium text-sm ${pathname === link.href ? 'bg-background text-primary' : 'text-muted-foreground hover:bg-background hover:text-foreground'}`}>
                   <span className="material-symbols-outlined text-base">{link.icon}</span>
                   <span>{link.label}</span>
               </Link>
