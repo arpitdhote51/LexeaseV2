@@ -47,13 +47,13 @@ export default function HomePage() {
           <h1 className="text-2xl font-bold text-primary font-headline">LexEase</h1>
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6">
-          <Link href="/new" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+          <Link href="/new" className="text-sm font-medium hover:underline underline-offset-4 text-foreground" prefetch={false}>
             Start Analysis
           </Link>
-          <Link href="/draft" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+          <Link href="/draft" className="text-sm font-medium hover:underline underline-offset-4 text-foreground" prefetch={false}>
             Draft Document
           </Link>
-          <Link href="/about" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+          <Link href="/about" className="text-sm font-medium hover:underline underline-offset-4 text-foreground" prefetch={false}>
             About
           </Link>
         </nav>
@@ -64,10 +64,10 @@ export default function HomePage() {
           <div className="container px-4 md:px-6 flex flex-col items-center text-center">
             <div className="space-y-4 max-w-3xl">
               <h1 className="text-4xl font-bold tracking-tighter text-primary sm:text-5xl xl:text-6xl/none font-headline">
-                Your AI-Powered Legal Co-Pilot for Indian Law
+                Your AI-Powered Legal Co-Pilot for Modern India
               </h1>
               <p className="text-muted-foreground md:text-xl">
-                LexEase is a highly capable AI legal assistant designed for Modern India. Ask Lexy anything below.
+                LexEase is a highly capable AI legal assistant. Ask Lexy anything below.
               </p>
             </div>
             <div className="w-full max-w-4xl mt-10 h-[500px]">
@@ -84,7 +84,7 @@ export default function HomePage() {
               <div className="space-y-2">
                 <div className="inline-block rounded-lg bg-secondary px-3 py-1 text-sm text-secondary-foreground">Key Capabilities</div>
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl font-headline text-primary">
-                  Designed for the Modern Indian Legal Professional
+                  Designed for Modern India
                 </h2>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                   LexEase integrates powerful AI with a deep understanding of India's legal landscape to provide unparalleled support.
@@ -93,7 +93,7 @@ export default function HomePage() {
             </div>
             <div className="mx-auto grid max-w-5xl items-start gap-8 sm:grid-cols-2 md:gap-12 lg:max-w-none lg:grid-cols-3 pt-12">
               {features.map((feature) => (
-                <Card key={feature.title} className="border-border shadow-none hover:shadow-lg transition-shadow bg-card hover:bg-muted">
+                <Card key={feature.title} className="border-border shadow-none hover:shadow-lg transition-shadow bg-card hover:bg-muted text-card-foreground">
                     <CardHeader className="flex flex-row items-center gap-4">
                         <div className="bg-accent/10 p-3 rounded-full">
                             <feature.icon className="h-6 w-6 text-accent" />
