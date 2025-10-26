@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, User } from "firebase/auth";
 import { app } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
@@ -100,6 +100,11 @@ export default function LoginPage() {
                         By continuing, you agree to our Terms of Service and Privacy Policy.
                     </p>
                 </CardContent>
+                 <CardFooter className="flex flex-col items-center justify-center pb-6">
+                    <p className="text-xs font-semibold text-muted-foreground text-center">
+                        Project by team CryptoCrew : GenAI Exchange Hackathon 2025
+                    </p>
+                </CardFooter>
             </Card>
         </div>
     );
