@@ -42,7 +42,7 @@ const features = [
 export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground font-body">
-      <header className="px-4 lg:px-6 h-14 flex items-center bg-white border-b">
+      <header className="px-4 lg:px-6 h-14 flex items-center bg-card border-b text-card-foreground">
         <Link href="/" className="flex items-center justify-center" prefetch={false}>
           <h1 className="text-2xl font-bold text-primary font-headline">LexEase</h1>
         </Link>
@@ -67,18 +67,18 @@ export default function HomePage() {
                 Your AI-Powered Legal Co-Pilot for Indian Law
               </h1>
               <p className="text-muted-foreground md:text-xl">
-                LexEase is a highly capable AI legal assistant designed for Indian legal professionals. Ask Lexy anything below.
+                LexEase is a highly capable AI legal assistant designed for Modern India. Ask Lexy anything below.
               </p>
             </div>
             <div className="w-full max-w-4xl mt-10 h-[500px]">
-              <Suspense fallback={<div className="w-full h-full bg-white/50 shadow-lg rounded-2xl border border-border/50 backdrop-blur-sm animate-pulse" />}>
+              <Suspense fallback={<div className="w-full h-full bg-card/50 shadow-lg rounded-2xl border border-border/50 backdrop-blur-sm animate-pulse" />}>
                 <LexyChat />
               </Suspense>
             </div>
           </div>
         </section>
 
-        <section id="features" className="w-full py-12 md:py-24 lg:py-32 bg-white">
+        <section id="features" className="w-full py-12 md:py-24 lg:py-32 bg-background">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
@@ -93,12 +93,12 @@ export default function HomePage() {
             </div>
             <div className="mx-auto grid max-w-5xl items-start gap-8 sm:grid-cols-2 md:gap-12 lg:max-w-none lg:grid-cols-3 pt-12">
               {features.map((feature) => (
-                <Card key={feature.title} className="border-border shadow-none hover:shadow-lg transition-shadow bg-background/50">
+                <Card key={feature.title} className="border-border shadow-none hover:shadow-lg transition-shadow bg-card hover:bg-muted">
                     <CardHeader className="flex flex-row items-center gap-4">
                         <div className="bg-accent/10 p-3 rounded-full">
                             <feature.icon className="h-6 w-6 text-accent" />
                         </div>
-                        <CardTitle className="text-lg font-bold text-foreground">{feature.title}</CardTitle>
+                        <CardTitle className="text-lg font-bold text-card-foreground">{feature.title}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <p className="text-sm text-muted-foreground">{feature.description}</p>
@@ -138,7 +138,7 @@ export default function HomePage() {
         </section>
       </main>
 
-      <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
+      <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t bg-card text-card-foreground">
         <p className="text-xs text-muted-foreground">&copy; 2024 LexEase. All rights reserved.</p>
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
           <Link href="#" className="text-xs hover:underline underline-offset-4" prefetch={false}>
