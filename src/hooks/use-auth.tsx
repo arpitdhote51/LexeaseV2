@@ -1,27 +1,40 @@
+
 "use client";
 
 import {
   createContext,
   useContext,
   useState,
+  useEffect,
   ReactNode,
 } from "react";
-import type { User } from "firebase/auth";
+import { getAuth, onAuthStateChanged, User } from "firebase/auth";
+import { app } from "@/lib/firebase"; // Import the initialized app
 
-// Define a simplified AuthContextType for a guest-only experience.
 interface AuthContextType {
-  user: User | null; // Always null for guest mode
-  loading: boolean; // Always false as we are not performing an async auth check
+  user: User | null;
+  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   
-  // In guest-only mode, the user is always null and loading is always false.
+  useEffect(() => {
+    const auth = getAuth(app);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   const value = {
-    user: null,
-    loading: false,
+    user,
+    loading,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -36,3 +49,5 @@ export const useAuth = () => {
 };
 
 export default AuthProvider;
+
+    
