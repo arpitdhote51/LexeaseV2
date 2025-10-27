@@ -79,6 +79,7 @@ export default function LoginPage() {
             <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
                 <div className="mx-auto grid w-[400px] gap-8">
                     <div>
+                         <h2 className="text-2xl font-bold text-primary mb-4 text-center">Project By Team CryptoCrew : GenaAi Exchange Hackathon 2025</h2>
                          <h1 className="text-4xl font-bold text-primary mb-2 font-headline">LexEase</h1>
                          <p className="text-muted-foreground">Enter your details below to access your legal co-pilot.</p>
                     </div>
@@ -134,4 +135,3 @@ export default function LoginPage() {
         </div>
     );
 }
-
