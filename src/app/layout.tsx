@@ -3,9 +3,7 @@
 
 import "@/app/globals.css";
 import { Toaster } from "@/components/ui/toaster";
-import { type ReactNode } from "react";
-import AuthProvider from "@/components/auth-provider";
-
+import { AuthProvider } from "@/components/auth-provider";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -22,3 +20,5 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+
+    

@@ -15,8 +15,10 @@ import {
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { getAuth, signOut, onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
+import { getAuth, signOut } from "firebase/auth";
 import { app } from "@/lib/firebase";
+import { useAuth } from "@/components/auth-provider";
+
 
 const features = [
   {
@@ -52,16 +54,9 @@ const features = [
 ];
 
 export default function HomePageClient() {
-  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const { currentUser, userLoggedIn } = useAuth();
   const [theme, setTheme] = useState('light');
   const auth = getAuth(app);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-    return () => unsubscribe();
-  }, [auth]);
 
   useEffect(() => {
     const savedTheme = typeof window !== 'undefined' ? localStorage.getItem('theme') || 'light' : 'light';
@@ -116,12 +111,12 @@ export default function HomePageClient() {
                 </SelectContent>
             </Select>
             
-            {user && (
+            {userLoggedIn && currentUser ? (
                  <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                             <Avatar className="h-8 w-8">
-                                <AvatarImage src={user.isAnonymous ? '' : user.photoURL ?? ''} alt={user.displayName ?? 'User'} />
+                                <AvatarImage src={currentUser.isAnonymous ? '' : currentUser.photoURL ?? ''} alt={currentUser.displayName ?? 'User'} />
                                 <AvatarFallback>
                                     <User />
                                 </AvatarFallback>
@@ -131,9 +126,9 @@ export default function HomePageClient() {
                     <DropdownMenuContent className="w-56" align="end" forceMount>
                         <DropdownMenuLabel className="font-normal">
                         <div className="flex flex-col space-y-1">
-                            <p className="text-sm font-medium leading-none">{user.isAnonymous ? "Guest" : user.displayName || "User"}</p>
+                            <p className="text-sm font-medium leading-none">{currentUser.isAnonymous ? "Guest" : currentUser.displayName || "User"}</p>
                             <p className="text-xs leading-none text-muted-foreground">
-                            {user.isAnonymous ? "Anonymous Session" : user.email || "No email"}
+                            {currentUser.isAnonymous ? "Anonymous Session" : currentUser.email || "No email"}
                             </p>
                         </div>
                         </DropdownMenuLabel>
@@ -144,6 +139,10 @@ export default function HomePageClient() {
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
+            ) : (
+                 <Button asChild variant="outline" size="sm">
+                    <Link href="/login">Sign In</Link>
+                 </Button>
             )}
           </div>
         </nav>
@@ -161,7 +160,7 @@ export default function HomePageClient() {
               </p>
             </div>
             <div className="w-full max-w-4xl mt-10 h-[500px]">
-              <Suspense fallback={<div className="w-full h-full bg-card/50 shadow-lg rounded-2xl border border-border/50 backdrop-blur-sm animate-pulse" />}>
+              <Suspense fallback={<div className="w-full h-full bg-white/10 dark:bg-black/10 backdrop-blur-lg border border-white/20 dark:border-black/20 shadow-lg rounded-2xl animate-pulse" />}>
                 <LexyChat glassmorphism />
               </Suspense>
             </div>
@@ -248,3 +247,5 @@ export default function HomePageClient() {
     </div>
   );
 }
+
+    

@@ -1,15 +1,17 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signInAnonymously } from "firebase/auth";
-import { auth, app } from "@/lib/firebase";
+import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
+import { Loader2 } from "lucide-react";
 
 const GoogleIcon = () => (
     <svg className="mr-3 h-5 w-5" viewBox="0 0 24 24">
@@ -22,23 +24,40 @@ const GoogleIcon = () => (
 
 
 export default function LoginPage() {
-    const [loading, setLoading] = useState(true);
     const router = useRouter();
     const { toast } = useToast();
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [isSigningIn, setIsSigningIn] = useState(false);
+    const [isRegistering, setIsRegistering] = useState(false);
+    
+    const handleAuthAction = async (action: 'signin' | 'register') => {
+        const authFunction = action === 'signin' ? signInWithEmailAndPassword : createUserWithEmailAndPassword;
+        const loadingSetter = action === 'signin' ? setIsSigningIn : setIsRegistering;
 
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-            if (currentUser) {
-                router.replace("/");
-            } else {
-                setLoading(false);
-            }
-        });
-        return () => unsubscribe();
-    }, [router]);
+        loadingSetter(true);
+        try {
+            await authFunction(auth, email, password);
+            toast({
+                title: action === 'signin' ? "Sign-in Successful" : "Registration Successful",
+                description: "Welcome to LexEase!",
+            });
+            router.push("/");
+        } catch (error: any) {
+            console.error(`${action} error:`, error);
+            toast({
+                variant: "destructive",
+                title: `${action === 'signin' ? 'Sign-in' : 'Registration'} Failed`,
+                description: error.message || "An unexpected error occurred. Please try again.",
+            });
+        } finally {
+            loadingSetter(false);
+        }
+    };
     
     const handleGoogleSignIn = async () => {
         const provider = new GoogleAuthProvider();
+        setIsSigningIn(true);
         try {
             await signInWithPopup(auth, provider);
             toast({
@@ -46,55 +65,43 @@ export default function LoginPage() {
                 description: "Welcome back to LexEase!",
             });
             router.push("/");
-        } catch (error: any) {
+        } catch (error: any) => {
             console.error("Google sign-in error:", error);
             toast({
                 variant: "destructive",
                 title: "Sign-in Failed",
                 description: error.message || "An unexpected error occurred. Please try again.",
             });
+        } finally {
+            setIsSigningIn(false);
         }
     };
-
-    const handleGuestSignIn = async () => {
-        try {
-            await signInAnonymously(auth);
-            toast({
-                title: "Entering Guest Mode",
-                description: "You are now browsing as a guest.",
-            });
-            router.push("/");
-        } catch (error: any) {
-            console.error("Guest sign-in error:", error);
-            toast({
-                variant: "destructive",
-                title: "Guest Mode Failed",
-                description: "Could not start a guest session. Please try again.",
-            });
-        }
-    };
-
-    if (loading) {
-        return (
-            <div className="flex h-screen w-full items-center justify-center bg-background">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-        );
-    }
     
     return (
         <div className="flex min-h-screen items-center justify-center bg-background p-4 animate-fade-in">
-            <Card className="w-full max-w-md shadow-2xl border-border animate-fade-in-up">
+            <Card className="w-full max-w-md shadow-2xl border-border rounded-2xl animate-fade-in-up">
                 <CardHeader className="text-center">
                      <h1 className="text-3xl font-bold text-primary mx-auto mb-2">LexEase</h1>
                     <CardTitle>Welcome to LexEase</CardTitle>
                     <CardDescription>Your AI-powered legal co-pilot.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <div className="space-y-3">
-                        <Button onClick={handleGoogleSignIn} variant="outline" className="w-full text-base py-6 border-foreground/20 transition-transform transform hover:scale-105">
-                            <GoogleIcon />
-                            Sign in with Google
+                     <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input id="email" type="email" placeholder="m@example.com" value={email} onChange={e => setEmail(e.target.value)} />
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="password">Password</Label>
+                        <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} />
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                        <Button onClick={() => handleAuthAction('signin')} disabled={isSigningIn || isRegistering} className="w-full">
+                            {isSigningIn && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Sign In
+                        </Button>
+                        <Button onClick={() => handleAuthAction('register')} disabled={isSigningIn || isRegistering} className="w-full" variant="secondary">
+                            {isRegistering && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Register
                         </Button>
                     </div>
 
@@ -103,20 +110,20 @@ export default function LoginPage() {
                         <span className="flex-shrink mx-4 text-xs font-semibold text-muted-foreground">OR</span>
                         <div className="flex-grow border-t border-muted"></div>
                     </div>
-
-                    <Button onClick={handleGuestSignIn} variant="secondary" className="w-full text-base py-6 transition-transform transform hover:scale-105">
-                        Continue as Guest
+                    
+                    <Button onClick={handleGoogleSignIn} variant="outline" className="w-full text-base py-6 border-foreground/20 transition-transform transform hover:scale-105" disabled={isSigningIn || isRegistering}>
+                        <GoogleIcon />
+                        Continue with Google
                     </Button>
                 </CardContent>
                  <CardFooter className="flex flex-col items-center justify-center pb-6">
                     <p className="text-xs text-muted-foreground text-center px-4">
-                        By continuing, you agree to our Terms of Service and Privacy Policy.
-                    </p>
-                    <p className="text-lg font-bold text-foreground text-center mt-6">
-                        Project by team CryptoCrew : GenAI Exchange Hackathon 2025
+                        By continuing, you agree to our <Link href="#" className="underline">Terms of Service</Link> and <Link href="#" className="underline">Privacy Policy</Link>.
                     </p>
                 </CardFooter>
             </Card>
         </div>
     );
 }
+
+    
