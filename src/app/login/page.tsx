@@ -3,8 +3,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, User } from "firebase/auth";
-import { getFirebase } from "@/lib/firebase";
+import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
@@ -25,7 +25,6 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(true);
     const router = useRouter();
     const { toast } = useToast();
-    const { auth } = getFirebase();
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -36,7 +35,7 @@ export default function LoginPage() {
             }
         });
         return () => unsubscribe();
-    }, [auth, router]);
+    }, [router]);
     
     const handleGoogleSignIn = async () => {
         const provider = new GoogleAuthProvider();
@@ -98,7 +97,7 @@ export default function LoginPage() {
                     <p className="text-xs text-muted-foreground text-center px-4">
                         By continuing, you agree to our Terms of Service and Privacy Policy.
                     </p>
-                    <p className="text-sm font-bold text-foreground text-center mt-6">
+                    <p className="text-lg font-bold text-foreground text-center mt-6">
                         Project by team CryptoCrew : GenAI Exchange Hackathon 2025
                     </p>
                 </CardFooter>

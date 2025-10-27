@@ -1,3 +1,4 @@
+
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
 import { initializeFirestore, persistentLocalCache, type Firestore, getFirestore } from "firebase/firestore";
@@ -8,7 +9,7 @@ let auth: Auth;
 let db: Firestore;
 let analytics: Analytics | undefined = undefined;
 
-const firebaseConfig = {
+export const firebaseConfig = {
     apiKey: "AIzaSyDcFJTJnGLI-uVStqI8uuQVcQMY34ilMJg",
     authDomain: "studio-7376954909-7abc4.firebaseapp.com",
     projectId: "studio-7376954909-7abc4",
@@ -19,29 +20,21 @@ const firebaseConfig = {
 };
 
 function initializeFirebase() {
-    if (typeof window !== 'undefined') {
-        if (!getApps().length) {
-            app = initializeApp(firebaseConfig);
-            try {
-                db = initializeFirestore(app, {
-                    localCache: persistentLocalCache({})
-                });
-            } catch (e) {
-                console.warn("Could not initialize persistent cache. Falling back to in-memory cache.", e);
-                db = getFirestore(app);
-            }
-            if (firebaseConfig.measurementId) {
-                try {
-                    analytics = getAnalytics(app);
-                } catch(e) {
-                    console.error("Failed to initialize Analytics", e);
-                }
-            }
-        } else {
-            app = getApp();
-            db = getFirestore(app);
-        }
+    if (getApps().length === 0) {
+        app = initializeApp(firebaseConfig);
         auth = getAuth(app);
+        db = getFirestore(app);
+        if (typeof window !== 'undefined' && firebaseConfig.measurementId) {
+            try {
+                analytics = getAnalytics(app);
+            } catch(e) {
+                console.error("Failed to initialize Analytics", e);
+            }
+        }
+    } else {
+        app = getApp();
+        auth = getAuth(app);
+        db = getFirestore(app);
     }
 }
 
