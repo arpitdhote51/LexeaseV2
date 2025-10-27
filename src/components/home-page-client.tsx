@@ -15,9 +15,9 @@ import {
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { getAuth, signOut } from "firebase/auth";
+import { signOut } from "firebase/auth";
 import { useAuth } from "@/components/auth-provider";
-import { app } from "@/lib/firebase";
+import { auth } from "@/lib/firebase";
 
 
 const features = [
@@ -56,7 +56,6 @@ const features = [
 export default function HomePageClient() {
   const { currentUser, userLoggedIn } = useAuth();
   const [theme, setTheme] = useState('light');
-  const auth = getAuth(app);
 
   useEffect(() => {
     const savedTheme = typeof window !== 'undefined' ? localStorage.getItem('theme') || 'light' : 'light';

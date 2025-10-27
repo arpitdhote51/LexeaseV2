@@ -3,10 +3,8 @@
 
 import React, { useContext, useState, useEffect } from "react";
 import { onAuthStateChanged, type User } from "firebase/auth";
-import { auth, app } from "@/lib/firebase"; // Import app as well
+import { auth } from "@/lib/firebase";
 import { Loader2 } from "lucide-react";
-import { getApps, initializeApp } from "firebase/app";
-import { firebaseConfig } from "@/lib/firebase";
 
 interface AuthContextType {
   currentUser: User | null;
@@ -34,10 +32,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Ensure Firebase is initialized
-    if (getApps().length === 0) {
-      initializeApp(firebaseConfig);
-    }
     const unsubscribe = onAuthStateChanged(auth, initializeUser);
     return unsubscribe;
   }, []);
@@ -74,16 +68,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loading,
   };
 
+  if (loading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="ml-4">Loading Session...</p>
+      </div>
+    );
+  }
+
   return (
     <AuthContext.Provider value={value}>
-      {loading ? (
-          <div className="flex h-screen w-full items-center justify-center bg-background">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="ml-4">Loading Session...</p>
-          </div>
-      ) : children}
+      {children}
     </AuthContext.Provider>
   );
 }
-
-export default AuthProvider;
