@@ -40,7 +40,9 @@ function ConfirmationContent() {
     <div className="max-w-2xl mx-auto">
         <Card className="bg-white shadow-lg border-green-200 animate-fade-in-up">
             <CardHeader className="text-center items-center pb-4">
-                <CheckCircle2 className="h-16 w-16 text-green-500 mb-4" />
+                <div className="animate-confirmation-check">
+                    <CheckCircle2 className="h-16 w-16 text-green-500 mb-4" />
+                </div>
                 <CardTitle className="text-2xl font-bold text-primary">Consultation Booked!</CardTitle>
                 <p className="text-muted-foreground pt-2">
                 Your session with {lawyer.name} has been confirmed.

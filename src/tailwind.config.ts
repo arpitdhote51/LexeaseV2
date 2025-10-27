@@ -6,7 +6,7 @@ const config = {
     './pages/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
     './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
+    './src//**/*.{ts,tsx}',
 	],
   prefix: "",
   theme: {
@@ -87,12 +87,22 @@ const config = {
           "0%": { opacity: "0", transform: "translateY(10px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        "confirmation-check": {
+          "0%": { transform: "scale(0.5)", opacity: "0" },
+          "50%": { transform: "scale(1.1)", opacity: "1" },
+          "100%": { transform: "scale(1)", opacity: "1" },
+        },
+        "shimmer": {
+          "100%": { transform: "translateX(100%)" },
+        }
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.5s ease-out",
         "fade-in-up": "fade-in-up 0.5s ease-out forwards",
+        "confirmation-check": "confirmation-check 0.8s ease-out forwards",
+        "shimmer": "shimmer 1.5s infinite"
       },
     },
   },

@@ -150,7 +150,7 @@ export default function LexyChat() {
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex items-start gap-4 text-left animate-fade-in-up ${
+                className={`flex items-start gap-4 text-left ${
                   message.role === "user" ? "justify-end" : ""
                 }`}
               >
@@ -160,7 +160,7 @@ export default function LexyChat() {
                   </Avatar>
                 )}
                 <div
-                  className={`rounded-lg px-4 py-3 max-w-2xl text-sm shadow-md relative group ${
+                  className={`rounded-lg px-4 py-3 max-w-2xl text-sm shadow-md relative group animate-fade-in-up ${
                     message.role === "user"
                       ? "bg-primary text-primary-foreground"
                       : "bg-background/80 text-foreground"
@@ -176,7 +176,7 @@ export default function LexyChat() {
               </div>
             ))}
             {isLoading && (
-                 <div className="flex items-start gap-4 text-left">
+                 <div className="flex items-start gap-4 text-left animate-fade-in-up">
                     <Avatar className="h-8 w-8 bg-primary text-primary-foreground">
                         <AvatarFallback><Bot size={20} /></AvatarFallback>
                     </Avatar>

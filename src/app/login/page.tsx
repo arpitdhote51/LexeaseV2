@@ -83,8 +83,8 @@ export default function LoginPage() {
     }
     
     return (
-        <div className="flex min-h-screen items-center justify-center bg-background p-4">
-            <Card className="w-full max-w-md shadow-2xl border-border">
+        <div className="flex min-h-screen items-center justify-center bg-background p-4 animate-fade-in">
+            <Card className="w-full max-w-md shadow-2xl border-border animate-fade-in-up">
                 <CardHeader className="text-center">
                      <h1 className="text-3xl font-bold text-primary mx-auto mb-2">LexEase</h1>
                     <CardTitle>Welcome to LexEase</CardTitle>
@@ -92,7 +92,7 @@ export default function LoginPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="space-y-3">
-                        <Button onClick={handleGoogleSignIn} variant="outline" className="w-full text-base py-6 border-foreground/20">
+                        <Button onClick={handleGoogleSignIn} variant="outline" className="w-full text-base py-6 border-foreground/20 transition-transform transform hover:scale-105">
                             <GoogleIcon />
                             Sign in with Google
                         </Button>
@@ -104,7 +104,7 @@ export default function LoginPage() {
                         <div className="flex-grow border-t border-muted"></div>
                     </div>
 
-                    <Button onClick={handleGuestSignIn} variant="secondary" className="w-full text-base py-6">
+                    <Button onClick={handleGuestSignIn} variant="secondary" className="w-full text-base py-6 transition-transform transform hover:scale-105">
                         Continue as Guest
                     </Button>
                 </CardContent>
@@ -112,7 +112,7 @@ export default function LoginPage() {
                     <p className="text-xs text-muted-foreground text-center px-4">
                         By continuing, you agree to our Terms of Service and Privacy Policy.
                     </p>
-                     <p className="text-lg font-bold text-foreground text-center mt-6">
+                     <p className="text-2xl font-extrabold text-foreground/80 text-center mt-6">
                         Project by team CryptoCrew : GenAI Exchange Hackathon 2025
                     </p>
                 </CardFooter>

@@ -306,7 +306,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
                   </div>
                 </RadioGroup>
               </div>
-              <Button onClick={handleAnalyze} disabled={isLoading || isParsing || !file || !!analysisResult || !documentText} className="w-full bg-accent text-white font-semibold py-3 rounded-lg hover:bg-accent/90">
+              <Button onClick={handleAnalyze} disabled={isLoading || isParsing || !file || !!analysisResult || !documentText} className="w-full bg-accent text-white font-semibold py-3 rounded-lg hover:bg-accent/90 transition-transform transform hover:scale-105">
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

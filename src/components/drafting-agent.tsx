@@ -120,9 +120,24 @@ export default function DraftingAgent() {
     });
   };
 
+  const LoadingSkeleton = () => (
+    <div className="space-y-4 p-6">
+        <Skeleton className="h-4 w-3/4" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-5/6" />
+        <div className="pt-4 space-y-4">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-1/2" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-4/5" />
+        </div>
+    </div>
+  );
+
 
   return (
-    <main className="flex-1 p-10 overflow-y-auto">
+    <main className="flex-1 p-10 overflow-y-auto animate-fade-in-up">
         <header className="mb-10">
             <h1 className="text-3xl font-bold text-primary">AI Legal Drafting Agent</h1>
             <p className="text-muted-foreground mt-1">
@@ -202,7 +217,7 @@ export default function DraftingAgent() {
                                 rows={8}
                              />
                         </div>
-                         <Button onClick={handleDraft} disabled={isLoading || !documentType} className="w-full bg-accent text-white font-semibold py-3 rounded-lg hover:bg-accent/90">
+                         <Button onClick={handleDraft} disabled={isLoading || !documentType} className="w-full bg-accent text-white font-semibold py-3 rounded-lg hover:bg-accent/90 transition-transform transform hover:scale-105">
                             {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Draft...</> : "Generate Draft"}
                         </Button>
                     </CardContent>
@@ -215,18 +230,9 @@ export default function DraftingAgent() {
                         <CardDescription>Review the AI-generated draft below. You can edit it before downloading.</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        {isLoading && (
-                             <div className="space-y-4 p-6">
-                                <Skeleton className="h-4 w-3/4" />
-                                <Skeleton className="h-4 w-full" />
-                                <Skeleton className="h-4 w-full" />
-                                <Skeleton className="h-4 w-5/6" />
-                                <Skeleton className="h-4 w-full" />
-                                <Skeleton className="h-4 w-1/2" />
-                             </div>
-                        )}
+                        {isLoading && <LoadingSkeleton />}
                         {generatedDraft && (
-                            <div className="space-y-4">
+                            <div className="space-y-4 animate-fade-in">
                                 <Textarea value={generatedDraft} onChange={(e) => setGeneratedDraft(e.target.value)} rows={20} className="bg-background font-mono text-xs"/>
                                 <div className="flex gap-4">
                                      <Button onClick={handleDownloadTxt} variant="outline">Download .txt</Button>

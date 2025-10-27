@@ -208,7 +208,7 @@ export default function QAChat({ documentText, documentId }: QAChatProps) {
             {messages.map((message, index) => (
               <div
                 key={message.id || `msg-${index}`}
-                className={`flex items-start gap-3 ${
+                className={`flex items-start gap-3 animate-fade-in-up ${
                   message.role === "user" ? "justify-end" : ""
                 }`}
               >
@@ -218,7 +218,7 @@ export default function QAChat({ documentText, documentId }: QAChatProps) {
                   </Avatar>
                 )}
                 <div
-                  className={`rounded-lg p-3 max-w-lg text-sm relative group ${
+                  className={`rounded-lg p-3 max-w-lg text-sm relative group shadow-sm ${
                     message.role === "user"
                       ? "bg-primary text-primary-foreground"
                       : "bg-background"
@@ -234,7 +234,7 @@ export default function QAChat({ documentText, documentId }: QAChatProps) {
               </div>
             ))}
             {isLoading && (
-                 <div className="flex items-start gap-3">
+                 <div className="flex items-start gap-3 animate-fade-in-up">
                     <Avatar className="h-8 w-8 bg-primary text-primary-foreground">
                         <AvatarFallback><Bot size={20} /></AvatarFallback>
                     </Avatar>
