@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -56,6 +56,24 @@ export default function LoginPage() {
         }
     };
 
+    const handleGuestSignIn = async () => {
+        try {
+            await signInAnonymously(auth);
+            toast({
+                title: "Entering Guest Mode",
+                description: "You are now browsing as a guest.",
+            });
+            router.push("/");
+        } catch (error: any) {
+            console.error("Guest sign-in error:", error);
+            toast({
+                variant: "destructive",
+                title: "Guest Mode Failed",
+                description: "Could not start a guest session. Please try again.",
+            });
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex h-screen w-full items-center justify-center bg-background">
@@ -78,9 +96,6 @@ export default function LoginPage() {
                             <GoogleIcon />
                             Sign in with Google
                         </Button>
-                         <Button onClick={handleGoogleSignIn} className="w-full text-base py-6">
-                            Sign up with Google
-                        </Button>
                     </div>
 
                     <div className="relative flex items-center py-2">
@@ -89,15 +104,15 @@ export default function LoginPage() {
                         <div className="flex-grow border-t border-muted"></div>
                     </div>
 
-                    <Button asChild variant="secondary" className="w-full text-base py-6">
-                        <Link href="/">Continue as Guest</Link>
+                    <Button onClick={handleGuestSignIn} variant="secondary" className="w-full text-base py-6">
+                        Continue as Guest
                     </Button>
                 </CardContent>
                  <CardFooter className="flex flex-col items-center justify-center pb-6">
                     <p className="text-xs text-muted-foreground text-center px-4">
                         By continuing, you agree to our Terms of Service and Privacy Policy.
                     </p>
-                    <p className="text-lg font-bold text-foreground text-center mt-6">
+                     <p className="text-lg font-bold text-foreground text-center mt-6">
                         Project by team CryptoCrew : GenAI Exchange Hackathon 2025
                     </p>
                 </CardFooter>
