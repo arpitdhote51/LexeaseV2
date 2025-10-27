@@ -76,8 +76,6 @@ export default function HomePageClient() {
   };
   
   const handleSignOut = () => {
-    // Signing out will trigger the onAuthStateChanged in AuthProvider,
-    // which will then create a new anonymous session.
     signOut(auth);
   };
 
