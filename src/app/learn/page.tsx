@@ -52,7 +52,7 @@ const videos = [
 export default function LearnLawPage() {
   return (
     <LexeaseLayout>
-        <main className="flex-1 p-10 overflow-y-auto">
+        <main className="flex-1 p-10 overflow-y-auto animate-fade-in-up">
             <header className="mb-10 text-center">
                 <h1 className="text-4xl font-bold text-primary">Learn Law with LexEase</h1>
                 <p className="text-muted-foreground mt-2 text-lg max-w-2xl mx-auto">
@@ -64,31 +64,36 @@ export default function LearnLawPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {videos.map((video, index) => (
                         <Link href={video.href} key={index}>
-                            <Card className="bg-white h-full border-border transition-all duration-300 hover:shadow-xl hover:-translate-y-1.5 cursor-pointer flex flex-col overflow-hidden rounded-xl">
-                                <div className="relative">
-                                    <Image 
-                                        src={video.thumbnail} 
-                                        alt={video.title} 
-                                        width={600}
-                                        height={400}
-                                        className="object-cover w-full h-48"
-                                        data-ai-hint="legal books"
-                                    />
-                                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                                        <PlayCircle className="h-16 w-16 text-white/80" />
+                            <div
+                              className="animate-fade-in-up"
+                              style={{ animationDelay: `${index * 100}ms` }}
+                            >
+                                <Card className="bg-white h-full border-border transition-all duration-300 hover:shadow-xl hover:-translate-y-1.5 cursor-pointer flex flex-col overflow-hidden rounded-xl">
+                                    <div className="relative">
+                                        <Image 
+                                            src={video.thumbnail} 
+                                            alt={video.title} 
+                                            width={600}
+                                            height={400}
+                                            className="object-cover w-full h-48"
+                                            data-ai-hint="legal books"
+                                        />
+                                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                                            <PlayCircle className="h-16 w-16 text-white/80" />
+                                        </div>
+                                        <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs font-semibold px-2 py-1 rounded-md flex items-center gap-1">
+                                            <Clock className="h-3 w-3"/>
+                                            <span>{video.duration}</span>
+                                        </div>
                                     </div>
-                                    <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs font-semibold px-2 py-1 rounded-md flex items-center gap-1">
-                                        <Clock className="h-3 w-3"/>
-                                        <span>{video.duration}</span>
-                                    </div>
-                                </div>
-                                <CardHeader>
-                                    <CardTitle className="text-lg font-bold text-foreground leading-snug">{video.title}</CardTitle>
-                                </CardHeader>
-                                <CardContent className="flex-1">
-                                    <p className="text-sm text-muted-foreground">{video.description}</p>
-                                </CardContent>
-                            </Card>
+                                    <CardHeader>
+                                        <CardTitle className="text-lg font-bold text-foreground leading-snug">{video.title}</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="flex-1">
+                                        <p className="text-sm text-muted-foreground">{video.description}</p>
+                                    </CardContent>
+                                </Card>
+                            </div>
                         </Link>
                     ))}
                 </div>

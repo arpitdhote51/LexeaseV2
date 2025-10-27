@@ -5,7 +5,7 @@ import { Building, Target, Users } from "lucide-react";
 export default function AboutPage() {
   return (
     <LexeaseLayout>
-        <main className="flex-1 p-10 overflow-y-auto">
+        <main className="flex-1 p-10 overflow-y-auto animate-fade-in-up">
             <header className="mb-10 text-center">
                 <h1 className="text-4xl font-bold text-primary">About LexEase</h1>
                 <p className="text-muted-foreground mt-2 text-lg max-w-2xl mx-auto">

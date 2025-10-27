@@ -150,7 +150,7 @@ export default function LexyChat() {
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex items-start gap-4 text-left ${
+                className={`flex items-start gap-4 text-left animate-fade-in-up ${
                   message.role === "user" ? "justify-end" : ""
                 }`}
               >
@@ -199,10 +199,10 @@ export default function LexyChat() {
                 disabled={isLoading}
                 className="text-base h-12 flex-1"
               />
-               <Button type="button" variant={isRecognizing ? "destructive" : "outline"} size="icon" onClick={startRecognition} disabled={isLoading} className="h-12 w-12">
+               <Button type="button" variant={isRecognizing ? "destructive" : "outline"} size="icon" onClick={startRecognition} disabled={isLoading} className="h-12 w-12 transition-transform transform hover:scale-110">
                   <Mic className="h-5 w-5" />
               </Button>
-              <Button type="submit" disabled={isLoading || !input.trim()} className="bg-primary hover:bg-primary/90 h-12 px-6">
+              <Button type="submit" disabled={isLoading || !input.trim()} className="bg-primary hover:bg-primary/90 h-12 px-6 transition-transform transform hover:scale-110">
                 <Send className="h-5 w-5" />
               </Button>
             </form>

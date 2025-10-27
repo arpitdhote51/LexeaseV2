@@ -38,7 +38,7 @@ function ConfirmationContent() {
 
   return (
     <div className="max-w-2xl mx-auto">
-        <Card className="bg-white shadow-lg border-green-200">
+        <Card className="bg-white shadow-lg border-green-200 animate-fade-in-up">
             <CardHeader className="text-center items-center pb-4">
                 <CheckCircle2 className="h-16 w-16 text-green-500 mb-4" />
                 <CardTitle className="text-2xl font-bold text-primary">Consultation Booked!</CardTitle>
@@ -80,7 +80,7 @@ function ConfirmationContent() {
 
                 <div className="text-center">
                     <p className="text-muted-foreground mb-2">Your meeting link is ready:</p>
-                    <Button asChild size="lg" className="bg-green-600 hover:bg-green-700">
+                    <Button asChild size="lg" className="bg-green-600 hover:bg-green-700 transition-transform transform hover:scale-105">
                         <a href="https://meet.google.com/lookup/placeholder" target="_blank" rel="noopener noreferrer">
                             <Video className="mr-2 h-5 w-5"/>
                             Join Google Meet

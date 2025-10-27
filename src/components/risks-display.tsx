@@ -10,7 +10,7 @@ export default function RisksDisplay({ risks }: RisksDisplayProps) {
 
     if (!risks || risks.length === 0) {
         return (
-            <Card className="mt-4 bg-white border-border shadow-none">
+            <Card className="mt-4 bg-white border-border shadow-none animate-fade-in">
                 <CardHeader>
                     <CardTitle className="font-bold text-lg text-foreground">Risk Flags</CardTitle>
                 </CardHeader>
@@ -23,13 +23,18 @@ export default function RisksDisplay({ risks }: RisksDisplayProps) {
 
 
   return (
-    <Card className="mt-4 bg-white border-border shadow-none">
+    <Card className="mt-4 bg-white border-border shadow-none animate-fade-in">
       <CardHeader>
         <CardTitle className="font-bold text-lg text-foreground">Potential Risk Flags</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {risks.map((risk, index) => (
-          <Alert key={index} variant="destructive" className="bg-red-50 border-red-200">
+          <Alert
+            key={index}
+            variant="destructive"
+            className="bg-red-50 border-red-200 animate-fade-in-up"
+            style={{ animationDelay: `${index * 100}ms` }}
+          >
             <AlertTriangle className="h-4 w-4 text-red-600" />
             <AlertTitle className="text-red-800">Potential Risk Identified</AlertTitle>
             <AlertDescription className="font-body text-red-700">{risk}</AlertDescription>

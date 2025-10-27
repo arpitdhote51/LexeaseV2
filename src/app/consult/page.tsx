@@ -22,7 +22,7 @@ export default function ConsultPage() {
 
   return (
     <LexeaseLayout>
-      <main className="flex-1 p-10 overflow-y-auto">
+      <main className="flex-1 p-10 overflow-y-auto animate-fade-in-up">
         <header className="mb-10">
           <h1 className="text-3xl font-bold text-primary">Consult with a Lawyer</h1>
           <p className="text-muted-foreground mt-1">
@@ -30,8 +30,14 @@ export default function ConsultPage() {
           </p>
         </header>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {lawyers.map((lawyer) => (
-            <LawyerCard key={lawyer.id} lawyer={lawyer} />
+          {lawyers.map((lawyer, index) => (
+            <div
+              key={lawyer.id}
+              className="animate-fade-in-up"
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
+              <LawyerCard lawyer={lawyer} />
+            </div>
           ))}
         </div>
       </main>

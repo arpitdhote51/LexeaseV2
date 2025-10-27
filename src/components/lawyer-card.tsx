@@ -19,7 +19,7 @@ export default function LawyerCard({ lawyer }: LawyerCardProps) {
   };
 
   return (
-    <div className="bg-white border border-border rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+    <div className="bg-white border border-border rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1.5">
       <div className="p-6">
         <div className="flex items-start gap-5">
           <Image
@@ -61,7 +61,7 @@ export default function LawyerCard({ lawyer }: LawyerCardProps) {
 
       </div>
        <div className="bg-background/50 p-4">
-            <Button onClick={handleBookConsultation} className="w-full bg-accent text-white font-semibold rounded-lg hover:bg-accent/90">
+            <Button onClick={handleBookConsultation} className="w-full bg-accent text-white font-semibold rounded-lg hover:bg-accent/90 transition-transform transform hover:scale-105">
                 Book Consultation
             </Button>
        </div>

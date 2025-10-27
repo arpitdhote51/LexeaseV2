@@ -6,7 +6,7 @@ interface SummaryDisplayProps {
 
 export default function SummaryDisplay({ summary }: SummaryDisplayProps) {
   return (
-    <Card className="mt-4 bg-white border-border shadow-none">
+    <Card className="mt-4 bg-white border-border shadow-none animate-fade-in">
       <CardHeader>
         <CardTitle className="font-bold text-lg text-foreground">Plain Language Summary</CardTitle>
       </CardHeader>

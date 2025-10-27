@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { getAuth, signOut, onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
+import { getAuth, signOut, onAuthStateChanged, User as FirebaseUser, signInAnonymously } from "firebase/auth";
 import { app } from "@/lib/firebase";
 
 const features = [
@@ -151,7 +151,7 @@ export default function HomePageClient() {
 
       <main className="flex-1">
         <section className="w-full py-12 md:py-24 lg:py-28 bg-gradient-to-br from-primary/5 via-background to-background">
-          <div className="container px-4 md:px-6 flex flex-col items-center text-center">
+          <div className="container px-4 md:px-6 flex flex-col items-center text-center animate-fade-in-up">
             <div className="space-y-4 max-w-3xl">
               <h1 className="text-4xl font-bold tracking-tighter text-primary sm:text-5xl xl:text-6xl/none font-headline">
                 Your AI-Powered Co-Pilot for Modern India
@@ -182,22 +182,28 @@ export default function HomePageClient() {
               </div>
             </div>
             <div className="mx-auto grid max-w-5xl items-start gap-8 sm:grid-cols-2 md:gap-12 lg:max-w-none lg:grid-cols-3 pt-12">
-              {features.map((feature) => (
-                <Card key={feature.title} className="border-border shadow-none hover:shadow-lg transition-shadow bg-card hover:bg-muted text-card-foreground">
-                    <CardHeader className="flex flex-row items-center gap-4">
-                        <div className="bg-accent/10 p-3 rounded-full">
-                            <feature.icon className="h-6 w-6 text-accent" />
-                        </div>
-                        <CardTitle className="text-lg font-bold text-card-foreground">{feature.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-sm text-muted-foreground">{feature.description}</p>
-                    </CardContent>
-                </Card>
+              {features.map((feature, index) => (
+                 <div
+                    key={feature.title}
+                    className="animate-fade-in-up"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <Card className="border-border shadow-none hover:shadow-lg transition-shadow h-full bg-card hover:bg-muted text-card-foreground">
+                        <CardHeader className="flex flex-row items-center gap-4">
+                            <div className="bg-accent/10 p-3 rounded-full">
+                                <feature.icon className="h-6 w-6 text-accent" />
+                            </div>
+                            <CardTitle className="text-lg font-bold text-card-foreground">{feature.title}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-sm text-muted-foreground">{feature.description}</p>
+                        </CardContent>
+                    </Card>
+                 </div>
               ))}
             </div>
-             <div className="text-center mt-12">
-                <Button asChild size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90">
+             <div className="text-center mt-12 animate-fade-in-up" style={{ animationDelay: '700ms' }}>
+                <Button asChild size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 transition-transform transform hover:scale-105">
                     <Link href="/new">
                       Analyze a Document
                       <ArrowRight className="ml-2 h-5 w-5" />
@@ -218,7 +224,7 @@ export default function HomePageClient() {
               </p>
             </div>
             <div className="mx-auto w-full max-w-sm space-y-2">
-               <Button asChild size="lg" className="bg-primary hover:bg-primary/90">
+               <Button asChild size="lg" className="bg-primary hover:bg-primary/90 transition-transform transform hover:scale-105">
                 <Link href="/new">
                   Start for Free
                 </Link>

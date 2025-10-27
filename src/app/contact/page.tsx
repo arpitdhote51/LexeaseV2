@@ -9,7 +9,7 @@ import { Mail, Phone, MapPin } from "lucide-react";
 export default function ContactPage() {
   return (
     <LexeaseLayout>
-        <main className="flex-1 p-10 overflow-y-auto">
+        <main className="flex-1 p-10 overflow-y-auto animate-fade-in-up">
             <header className="mb-10 text-center">
                 <h1 className="text-4xl font-bold text-primary">Contact Us</h1>
                 <p className="text-muted-foreground mt-2 text-lg max-w-2xl mx-auto">
@@ -19,7 +19,7 @@ export default function ContactPage() {
 
             <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-10">
                 <div className="lg:col-span-1 space-y-6">
-                    <Card className="bg-white shadow-none border-border">
+                    <Card className="bg-white shadow-none border-border transition-all hover:shadow-lg hover:border-primary/20">
                         <CardHeader className="flex-row items-center gap-4">
                             <Mail className="h-8 w-8 text-primary"/>
                             <div>
@@ -28,7 +28,7 @@ export default function ContactPage() {
                             </div>
                         </CardHeader>
                     </Card>
-                     <Card className="bg-white shadow-none border-border">
+                     <Card className="bg-white shadow-none border-border transition-all hover:shadow-lg hover:border-primary/20">
                         <CardHeader className="flex-row items-center gap-4">
                             <Phone className="h-8 w-8 text-primary"/>
                              <div>
@@ -37,7 +37,7 @@ export default function ContactPage() {
                             </div>
                         </CardHeader>
                     </Card>
-                     <Card className="bg-white shadow-none border-border">
+                     <Card className="bg-white shadow-none border-border transition-all hover:shadow-lg hover:border-primary/20">
                         <CardHeader className="flex-row items-center gap-4">
                             <MapPin className="h-8 w-8 text-primary"/>
                              <div>
@@ -74,7 +74,7 @@ export default function ContactPage() {
                                     <Label htmlFor="message" className="text-foreground">Message</Label>
                                     <Textarea id="message" name="message" placeholder="Please type your message here..." rows={6} />
                                 </div>
-                                <Button type="submit" className="w-full bg-accent text-white font-semibold py-3 rounded-lg hover:bg-accent/90">
+                                <Button type="submit" className="w-full bg-accent text-white font-semibold py-3 rounded-lg hover:bg-accent/90 transition-transform transform hover:scale-105">
                                     Send Message
                                 </Button>
                             </form>
