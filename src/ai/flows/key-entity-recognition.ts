@@ -15,6 +15,7 @@ import {z} from 'genkit';
 
 const KeyEntityRecognitionInputSchema = z.object({
   documentText: z.string().describe("The text content of the document to analyze."),
+  language: z.string().describe('The language for the analysis (e.g., "English", "Hindi").'),
 });
 export type KeyEntityRecognitionInput = z.infer<
   typeof KeyEntityRecognitionInputSchema
@@ -50,7 +51,7 @@ const keyEntityRecognitionPrompt = ai.definePrompt({
   prompt: `You are an AI assistant specializing in legal document analysis.
   Your task is to identify and extract key entities from the following legal document.
   The entities should include parties involved, dates, locations, and other relevant information.
-  The extracted entities should be in the same language as the document.
+  The extracted entities must be in the requested language: {{{language}}}.
 
   Document:
   {{{documentText}}}

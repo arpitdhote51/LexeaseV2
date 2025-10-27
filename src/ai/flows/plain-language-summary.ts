@@ -19,6 +19,7 @@ const PlainLanguageSummarizationInputSchema = z.object({
     .describe(
       'The role of the user, which affects the complexity of the summary.  Options are lawyer, lawStudent, and layperson.'
     ),
+  language: z.string().describe('The language for the summary (e.g., "English", "Hindi").'),
 });
 export type PlainLanguageSummarizationInput = z.infer<
   typeof PlainLanguageSummarizationInputSchema
@@ -47,7 +48,7 @@ const prompt = ai.definePrompt({
 
   Summarize the following legal document into plain, easy-to-understand language tailored to the user's role.
   The summary should focus on the key points and obligations within the document.
-  The summary should be in the same language as the provided legal document.
+  The summary must be in the requested language: {{{language}}}.
 
   User Role: {{{userRole}}}
   Legal Document:

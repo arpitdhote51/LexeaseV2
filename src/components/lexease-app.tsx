@@ -43,6 +43,7 @@ import { Skeleton } from "./ui/skeleton";
 import type { DocumentData, AnalysisResult } from "@/lib/types";
 import Header from "./layout/header";
 import GoogleDrivePicker from "./google-drive-picker";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 
 type UserRole = "layperson" | "lawStudent" | "lawyer";
 
@@ -53,6 +54,7 @@ interface LexeaseAppProps {
 export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
   const [documentText, setDocumentText] = useState("");
   const [userRole, setUserRole] = useState<UserRole>("layperson");
+  const [language, setLanguage] = useState("English");
   const [isLoading, setIsLoading] = useState(false);
   const [isParsing, setIsParsing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
@@ -74,10 +76,12 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
         setFile(new File([], existingDocument.fileName));
       }
     } else {
+        // Reset state when there's no existing document (e.g., on /new)
         setDocumentText("");
         setAnalysisResult(null);
         setFile(null);
         setUserRole("layperson");
+        setLanguage("English");
     }
   }, [existingDocument]);
 
@@ -155,10 +159,10 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
     setAnalysisResult(null);
 
     try {
-      const summarizationInput: PlainLanguageSummarizationInput = { documentText, userRole };
-      const entityInput: KeyEntityRecognitionInput = { documentText };
-      const riskInput: RiskFlaggingInput = { documentText };
-      const strategicInput: StrategicAdvisorAgentInput = { documentText };
+      const summarizationInput: PlainLanguageSummarizationInput = { documentText, userRole, language };
+      const entityInput: KeyEntityRecognitionInput = { documentText, language };
+      const riskInput: RiskFlaggingInput = { documentText, language };
+      const strategicInput: StrategicAdvisorAgentInput = { documentText, language };
 
       const [summary, entities, risks, strategicAdvice] = await Promise.all([
         plainLanguageSummarization(summarizationInput),
@@ -307,12 +311,12 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
   
   const onDrop = useCallback((event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
-    if(existingDocument || isLoading || isParsing || analysisResult) return;
+    if(isLoading || isParsing || analysisResult) return;
     const files = event.dataTransfer.files;
     if (files && files.length > 0) {
       processFile(files[0]);
     }
-  }, [existingDocument, isLoading, isParsing, analysisResult]);
+  }, [isLoading, isParsing, analysisResult]);
 
   const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -323,135 +327,150 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
     <>
     <Header />
     <main className="flex-1 p-10 overflow-y-auto">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        { !existingDocument && (
-        <div className="lg:col-span-5">
-          <Card className="sticky top-8 bg-card shadow-none border-border">
-            <CardHeader>
-              <CardTitle className="font-bold text-2xl text-foreground">Document Input</CardTitle>
-              <CardDescription>
-                Upload a new document for analysis.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-               <div
-                className={`relative flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl bg-background  ${!existingDocument && !analysisResult ? 'cursor-pointer hover:bg-muted/50' : 'cursor-not-allowed'}`}
-                onDrop={onDrop}
-                onDragOver={onDragOver}
-                >
-                <input
-                    id="file-upload"
-                    type="file"
-                    className="sr-only"
-                    onChange={handleFileChange}
-                    accept=".pdf,.docx,.txt"
-                    disabled={isLoading || !!existingDocument || isParsing || !!analysisResult}
-                />
-                {isParsing ? (
-                    <div className="text-center p-4">
-                        <Loader2 className="mx-auto h-12 w-12 text-primary animate-spin" />
-                        <p className="mt-4 font-semibold">Parsing Document...</p>
-                        <p className="text-sm text-muted-foreground">Extracting text for analysis.</p>
-                    </div>
-                ) : file ? (
-                    <div className="text-center p-4">
-                        <FileIcon className="mx-auto h-12 w-12 text-muted-foreground" />
-                        <p className="mt-2 font-semibold truncate">{file.name}</p>
-                         {!existingDocument && (
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="mt-2 text-red-500 hover:text-red-700"
-                                onClick={() => {
-                                    setFile(null);
-                                    setDocumentText('');
-                                    setAnalysisResult(null);
-                                }}
-                            >
-                                <X className="mr-2 h-4 w-4" />
-                                Remove
-                            </Button>
+      <div className="space-y-8">
+        {!analysisResult && (
+            <Card className="bg-card shadow-none border-border animate-fade-in-up">
+                <CardHeader>
+                    <CardTitle className="font-bold text-2xl text-foreground">New Document Analysis</CardTitle>
+                    <CardDescription>
+                        Upload a document to get started.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <div
+                    className={`relative flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl bg-background  ${!analysisResult ? 'cursor-pointer hover:bg-muted/50' : 'cursor-not-allowed'}`}
+                    onDrop={onDrop}
+                    onDragOver={onDragOver}
+                    >
+                        <input
+                            id="file-upload"
+                            type="file"
+                            className="sr-only"
+                            onChange={handleFileChange}
+                            accept=".pdf,.docx,.txt"
+                            disabled={isLoading || isParsing || !!analysisResult}
+                        />
+                        {isParsing ? (
+                            <div className="text-center p-4">
+                                <Loader2 className="mx-auto h-12 w-12 text-primary animate-spin" />
+                                <p className="mt-4 font-semibold">Parsing Document...</p>
+                                <p className="text-sm text-muted-foreground">Extracting text for analysis.</p>
+                            </div>
+                        ) : file ? (
+                            <div className="text-center p-4">
+                                <FileIcon className="mx-auto h-12 w-12 text-muted-foreground" />
+                                <p className="mt-2 font-semibold truncate">{file.name}</p>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="mt-2 text-red-500 hover:text-red-700"
+                                    onClick={() => {
+                                        setFile(null);
+                                        setDocumentText('');
+                                        setAnalysisResult(null);
+                                    }}
+                                >
+                                    <X className="mr-2 h-4 w-4" />
+                                    Remove
+                                </Button>
+                            </div>
+                        ) : (
+                            <label htmlFor="file-upload" className={`w-full h-full flex flex-col items-center justify-center text-center ${!analysisResult ? 'cursor-pointer' : 'cursor-not-allowed'}`}>
+                                <FileUp className="h-12 w-12 text-muted-foreground" />
+                                <p className="mt-4 text-sm font-semibold text-foreground">
+                                    Drag & drop or click to upload
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                    PDF, DOCX, or TXT files
+                                </p>
+                            </label>
                         )}
                     </div>
-                ) : (
-                    <label htmlFor="file-upload" className={`w-full h-full flex flex-col items-center justify-center text-center ${!existingDocument && !analysisResult ? 'cursor-pointer' : 'cursor-not-allowed'}`}>
-                        <FileUp className="h-12 w-12 text-muted-foreground" />
-                        <p className="mt-4 text-sm font-semibold text-foreground">
-                            Drag & drop or click to upload
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                            PDF, DOCX, or TXT files
-                        </p>
-                    </label>
-                )}
-                </div>
-                
-                <div className="relative flex items-center">
-                  <div className="flex-grow border-t border-muted"></div>
-                  <span className="flex-shrink mx-4 text-xs font-semibold text-muted-foreground">OR</span>
-                  <div className="flex-grow border-t border-muted"></div>
-                </div>
+                    
+                    <div className="relative flex items-center">
+                    <div className="flex-grow border-t border-muted"></div>
+                    <span className="flex-shrink mx-4 text-xs font-semibold text-muted-foreground">OR</span>
+                    <div className="flex-grow border-t border-muted"></div>
+                    </div>
 
-                <GoogleDrivePicker onFilePicked={processFile} />
+                    <GoogleDrivePicker onFilePicked={processFile} />
 
-              <div className="space-y-4">
-                <Label className="font-semibold text-foreground">Select Your Role</Label>
-                <RadioGroup
-                  defaultValue="layperson"
-                  className="flex flex-col sm:flex-row gap-4"
-                  value={userRole}
-                  onValueChange={(value: UserRole) => setUserRole(value)}
-                  disabled={isLoading || !!existingDocument || isParsing || !!analysisResult}
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="layperson" id="r1" />
-                    <Label htmlFor="r1" className="text-foreground">Layperson</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="lawStudent" id="r2" />
-                    <Label htmlFor="r2" className="text-foreground">Law Student</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="lawyer" id="r3" />
-                    <Label htmlFor="r3" className="text-foreground">Lawyer</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-              <Button onClick={handleAnalyze} disabled={isLoading || isParsing || !file || !!analysisResult || !documentText} className="w-full bg-accent text-white font-semibold py-3 rounded-lg hover:bg-accent/90 transition-transform transform hover:scale-105">
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Analyzing...
-                  </>
-                ) : analysisResult ? "Analysis Complete" : "Analyze Document" }
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                      <div className="space-y-2">
+                        <Label className="font-semibold text-foreground">Select Your Role</Label>
+                        <RadioGroup
+                          defaultValue="layperson"
+                          className="flex gap-4"
+                          value={userRole}
+                          onValueChange={(value: UserRole) => setUserRole(value)}
+                          disabled={isLoading || isParsing || !!analysisResult}
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="layperson" id="r1" />
+                            <Label htmlFor="r1" className="text-foreground">Layperson</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="lawStudent" id="r2" />
+                            <Label htmlFor="r2" className="text-foreground">Law Student</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="lawyer" id="r3" />
+                            <Label htmlFor="r3" className="text-foreground">Lawyer</Label>
+                          </div>
+                        </RadioGroup>
+                      </div>
+                      <div className="space-y-2">
+                          <Label htmlFor="language" className="font-semibold text-foreground">Analysis Language</Label>
+                          <Select onValueChange={setLanguage} value={language}>
+                              <SelectTrigger id="language">
+                                  <SelectValue placeholder="Select language..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                  <SelectItem value="English">English</SelectItem>
+                                  <SelectItem value="Hindi">Hindi</SelectItem>
+                                  <SelectItem value="Marathi">Marathi</SelectItem>
+                                  <SelectItem value="Kannada">Kannada</SelectItem>
+                              </SelectContent>
+                          </Select>
+                      </div>
+                    </div>
+
+                    <Button onClick={handleAnalyze} disabled={isLoading || isParsing || !file || !!analysisResult || !documentText} className="w-full bg-accent text-white font-semibold py-3 rounded-lg hover:bg-accent/90 transition-transform transform hover:scale-105">
+                        {isLoading ? (
+                        <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Analyzing...
+                        </>
+                        ) : analysisResult ? "Analysis Complete" : "Analyze Document" }
+                    </Button>
+                </CardContent>
+            </Card>
         )}
-        <div className={existingDocument ? "lg:col-span-12" : "lg:col-span-7"}>
-          <Card className="bg-card shadow-none border-border">
+
+        {analysisResult && (
+          <Card className="bg-card shadow-none border-border animate-fade-in-up">
             <CardHeader className="flex flex-row justify-between items-center">
                 <div>
                     <CardTitle className="font-bold text-2xl text-foreground">
                         { file ? file.name : "Analysis Results" }
                     </CardTitle>
                     <CardDescription>
-                        { existingDocument ? "Viewing analysis for your document." : "Here is a breakdown of your legal document." }
+                        Here is a breakdown of your legal document.
                     </CardDescription>
                 </div>
-                <Button onClick={handleDownloadPdfReport} disabled={!analysisResult} size="sm">
-                    <Download className="mr-2 h-4 w-4" />
-                    Download Report
-                </Button>
+                <div className="flex items-center gap-4">
+                  <Button onClick={handleDownloadPdfReport} disabled={!analysisResult} size="sm">
+                      <Download className="mr-2 h-4 w-4" />
+                      Download Report
+                  </Button>
+                   <Button variant="outline" onClick={() => setAnalysisResult(null)}>
+                      <X className="mr-2 h-4 w-4" />
+                      Start New Analysis
+                  </Button>
+                </div>
             </CardHeader>
             <CardContent>
-              {(isLoading || isParsing) && !analysisResult ? <AnalysisPlaceholder /> :
-                !analysisResult && !documentText && !existingDocument ? (
-                  <div className="text-center text-muted-foreground py-16">
-                    <p>Your analysis results will appear here once you upload and analyze a document.</p>
-                  </div>
-                ) : (
+              {(isLoading || isParsing) && !analysisResult ? <AnalysisPlaceholder /> : (
                 <Tabs defaultValue="summary" className="w-full">
                   <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 bg-background">
                     <TabsTrigger value="summary">Summary</TabsTrigger>
@@ -460,7 +479,6 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
                     <TabsTrigger value="risks">Risk Flags</TabsTrigger>
                     <TabsTrigger value="qa" disabled={!documentText}>Q&A</TabsTrigger>
                   </TabsList>
-                  {analysisResult ? (
                     <>
                       <TabsContent value="summary">
                         <SummaryDisplay summary={analysisResult.summary.plainLanguageSummary} />
@@ -478,22 +496,11 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
                         <QAChat documentText={documentText} />
                       </TabsContent>
                     </>
-                  ) : (
-                    <div className="text-center text-muted-foreground py-16">
-                        {(isLoading || isParsing) ? (
-                            <AnalysisPlaceholder />
-                        ) : !documentText ? (
-                            <p>Upload a document to get started.</p>
-                        ) : (
-                             <p>Click "Analyze Document" to see the results.</p>
-                        )}
-                    </div>
-                  )}
                 </Tabs>
               )}
             </CardContent>
           </Card>
-        </div>
+        )}
       </div>
     </main>
     </>

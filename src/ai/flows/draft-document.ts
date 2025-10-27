@@ -115,7 +115,8 @@ const draftingAgentPrompt = ai.definePrompt({
         3.  Carefully and accurately extract every piece of information from the user's JSON input and fill in all corresponding placeholders in the template (e.g., [Name], [Party 1 Name], [Party 1 Address], [Rent Amount], etc.).
         4.  If the user provides additional clauses or details under 'agreementDetails', integrate them logically into the body of the document.
         5.  Ensure the final document is coherent, professionally formatted, and complete. The final output must be only the raw text of the document itself.
-        6.  Do not add any extra explanations, headers, titles, or conversational text. The output should be only the final, clean text of the legal draft, ready to be copied or downloaded.
+        6.  The final draft must be in the requested language: {{{language}}}.
+        7.  Do not add any extra explanations, headers, titles, or conversational text. The output should be only the final, clean text of the legal draft, ready to be copied or downloaded.
 
         USER-PROVIDED DETAILS (JSON):
         ---

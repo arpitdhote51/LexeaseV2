@@ -8,7 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Moon, Sun, Monitor } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 
 
 export default function ChatHistorySidebar() {
@@ -97,6 +97,8 @@ export default function ChatHistorySidebar() {
                 <SelectContent>
                     <SelectItem value="en">English</SelectItem>
                     <SelectItem value="hi">Hindi</SelectItem>
+                    <SelectItem value="mr">Marathi</SelectItem>
+                    <SelectItem value="kn">Kannada</SelectItem>
                 </SelectContent>
             </Select>
         </div>

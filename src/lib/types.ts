@@ -13,7 +13,6 @@ export interface AnalysisResult {
 
 export interface DocumentData {
   id: string;
-  userId: string;
   fileName: string;
   documentDataUri: string;
   analysis: AnalysisResult;

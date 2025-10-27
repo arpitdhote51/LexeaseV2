@@ -15,6 +15,7 @@ import { z } from 'genkit';
 
 const StrategicAdvisorAgentInputSchema = z.object({
   documentText: z.string().describe("The text content of the document to analyze."),
+  language: z.string().describe('The language for the analysis (e.g., "English", "Hindi").'),
 });
 export type StrategicAdvisorAgentInput = z.infer<typeof StrategicAdvisorAgentInputSchema>;
 
@@ -43,6 +44,7 @@ const strategicAdvisorAgentPrompt = ai.definePrompt({
   output: { schema: StrategicAdvisorAgentOutputSchema },
   prompt: `You are an AI assistant role-playing as a senior legal strategist.
   Your task is to analyze the provided legal document and offer a high-level strategic assessment.
+  The entire response must be in the requested language: {{{language}}}.
 
   1.  **Assess Case Strength**: Read the entire document and evaluate the strength of the legal position presented. Provide a numerical score from 1 (very weak) to 10 (very strong).
   2.  **Justify the Score**: Briefly explain the reasoning behind your score. Mention the key factors that influenced your decision, such as the quality of evidence cited, the clarity of the arguments, or potential legal vulnerabilities.
