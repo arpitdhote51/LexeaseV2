@@ -1,6 +1,5 @@
 
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
-import { getAuth, type Auth } from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
 import { getAnalytics, type Analytics } from "firebase/analytics";
 
@@ -15,38 +14,27 @@ export const firebaseConfig = {
 };
 
 let app: FirebaseApp;
-let auth: Auth;
-let db: Firestore;
+let db: Firestore | undefined;
 let analytics: Analytics | undefined = undefined;
 
-// This function ensures that Firebase is initialized only once.
 function initializeFirebase() {
     if (getApps().length === 0) {
         app = initializeApp(firebaseConfig);
-        if (typeof window !== 'undefined') {
-            try {
-                // These services should only be initialized on the client-side.
-                auth = getAuth(app);
-                db = getFirestore(app);
-                if (firebaseConfig.measurementId) {
-                    analytics = getAnalytics(app);
-                }
-            } catch (e) {
-                console.error("Failed to initialize Firebase client services", e);
-            }
-        }
     } else {
         app = getApp();
-        if (typeof window !== 'undefined') {
-            // Ensure services are available on subsequent calls too
-            auth = getAuth(app);
+    }
+    
+    if (typeof window !== 'undefined') {
+        // Initialize client-side services only in the browser
+        if (!db) {
             db = getFirestore(app);
+        }
+        if (firebaseConfig.measurementId && !analytics) {
+            analytics = getAnalytics(app);
         }
     }
 }
 
-// Initialize Firebase immediately when this module is loaded.
 initializeFirebase();
 
-// Export the initialized services.
-export { app, auth, db, analytics };
+export { app, db, analytics };

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, Scale, Search, FileText, Languages, Shield, ArrowRight, Moon, Sun, User, LogOut } from "lucide-react";
+import { BookOpen, Scale, Search, FileText, Languages, Shield, ArrowRight, Moon, Sun } from "lucide-react";
 import LexyChat from "@/components/lexy-chat";
 import { Suspense, useEffect, useState } from "react";
 import {
@@ -13,11 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { signOut } from "firebase/auth";
-import { useAuth } from "@/components/auth-provider";
-import { auth } from "@/lib/firebase";
 
 
 const features = [
@@ -54,7 +49,6 @@ const features = [
 ];
 
 export default function HomePageClient() {
-  const { currentUser, userLoggedIn } = useAuth();
   const [theme, setTheme] = useState('light');
 
   useEffect(() => {
@@ -67,10 +61,6 @@ export default function HomePageClient() {
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
     document.documentElement.className = newTheme;
-  };
-  
-  const handleSignOut = () => {
-    signOut(auth);
   };
 
   return (
@@ -109,40 +99,6 @@ export default function HomePageClient() {
                     <SelectItem value="hi">Hindi</SelectItem>
                 </SelectContent>
             </Select>
-            
-            {userLoggedIn && currentUser ? (
-                 <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                            <Avatar className="h-8 w-8">
-                                <AvatarImage src={currentUser.photoURL ?? ''} alt={currentUser.displayName ?? 'User'} />
-                                <AvatarFallback>
-                                    <User />
-                                </AvatarFallback>
-                            </Avatar>
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56" align="end" forceMount>
-                        <DropdownMenuLabel className="font-normal">
-                        <div className="flex flex-col space-y-1">
-                            <p className="text-sm font-medium leading-none">{currentUser.displayName || "User"}</p>
-                            <p className="text-xs leading-none text-muted-foreground">
-                            {currentUser.email || "No email"}
-                            </p>
-                        </div>
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={handleSignOut}>
-                            <LogOut className="mr-2 h-4 w-4" />
-                            <span>Log Out</span>
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            ) : (
-                 <Button asChild variant="outline" size="sm">
-                    <Link href="/login">Sign In</Link>
-                 </Button>
-            )}
           </div>
         </nav>
       </header>
@@ -202,7 +158,7 @@ export default function HomePageClient() {
             </div>
              <div className="text-center mt-12 animate-fade-in-up" style={{ animationDelay: '700ms' }}>
                 <Button asChild size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 transition-transform transform hover:scale-105">
-                    <Link href="/login">
+                    <Link href="/new">
                       Analyze a Document
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Link>
@@ -223,7 +179,7 @@ export default function HomePageClient() {
             </div>
             <div className="mx-auto w-full max-w-sm space-y-2">
                <Button asChild size="lg" className="bg-primary hover:bg-primary/90 transition-transform transform hover:scale-105">
-                <Link href="/login">
+                <Link href="/new">
                   Start for Free
                 </Link>
               </Button>
