@@ -224,7 +224,7 @@ export default function HomePageClient() {
             </div>
             <div className="mx-auto w-full max-w-sm space-y-2">
                <Button asChild size="lg" className="bg-primary hover:bg-primary/90 transition-transform transform hover:scale-105">
-                <Link href="/new">
+                <Link href="/login">
                   Start for Free
                 </Link>
               </Button>
@@ -247,5 +247,3 @@ export default function HomePageClient() {
     </div>
   );
 }
-
-    
