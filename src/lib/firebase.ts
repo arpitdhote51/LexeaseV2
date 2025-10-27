@@ -1,43 +1,52 @@
 
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
-import { initializeFirestore, persistentLocalCache, type Firestore, getFirestore } from "firebase/firestore";
+import { getFirestore, type Firestore } from "firebase/firestore";
 import { getAnalytics, type Analytics } from "firebase/analytics";
+
+export const firebaseConfig = {
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+    measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+};
 
 let app: FirebaseApp;
 let auth: Auth;
 let db: Firestore;
 let analytics: Analytics | undefined = undefined;
 
-export const firebaseConfig = {
-    apiKey: "AIzaSyDcFJTJnGLI-uVStqI8uuQVcQMY34ilMJg",
-    authDomain: "studio-7376954909-7abc4.firebaseapp.com",
-    projectId: "studio-7376954909-7abc4",
-    storageBucket: "studio-7376954909-7abc4.appspot.com",
-    messagingSenderId: "131083878984",
-    appId: "1:131083878984:web:0b73c0919373959b85c2c5",
-    measurementId: "G-9T325DLBHR"
-};
-
+// This function ensures that Firebase is initialized only once.
 function initializeFirebase() {
     if (getApps().length === 0) {
         app = initializeApp(firebaseConfig);
-        auth = getAuth(app);
-        db = getFirestore(app);
-        if (typeof window !== 'undefined' && firebaseConfig.measurementId) {
+        if (typeof window !== 'undefined') {
             try {
-                analytics = getAnalytics(app);
-            } catch(e) {
-                console.error("Failed to initialize Analytics", e);
+                // These services should only be initialized on the client-side.
+                auth = getAuth(app);
+                db = getFirestore(app);
+                if (firebaseConfig.measurementId) {
+                    analytics = getAnalytics(app);
+                }
+            } catch (e) {
+                console.error("Failed to initialize Firebase client services", e);
             }
         }
     } else {
         app = getApp();
-        auth = getAuth(app);
-        db = getFirestore(app);
+        if (typeof window !== 'undefined') {
+            // Ensure services are available on subsequent calls too
+            auth = getAuth(app);
+            db = getFirestore(app);
+        }
     }
 }
 
+// Initialize Firebase immediately when this module is loaded.
 initializeFirebase();
 
+// Export the initialized services.
 export { app, auth, db, analytics };

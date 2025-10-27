@@ -22,7 +22,6 @@ const GoogleIcon = () => (
     </svg>
 );
 
-
 export default function LoginPage() {
     const router = useRouter();
     const { toast } = useToast();
@@ -75,62 +74,57 @@ export default function LoginPage() {
     };
     
     return (
-        <div className="w-full min-h-screen lg:grid lg:grid-cols-2 animate-fade-in bg-background">
-            <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-                <div className="mx-auto grid w-[400px] gap-8">
-                    <div>
-                         <h2 className="text-2xl font-bold text-primary mb-4 text-center">Project By Team CryptoCrew : GenaAi Exchange Hackathon 2025</h2>
-                         <h1 className="text-4xl font-bold text-primary mb-2 font-headline">LexEase</h1>
-                         <p className="text-muted-foreground">Enter your details below to access your legal co-pilot.</p>
-                    </div>
-                    
-                    <div className="grid gap-6">
-                        <div className="grid gap-3">
-                            <Label htmlFor="email">Email</Label>
-                            <Input id="email" type="email" placeholder="m@example.com" required value={email} onChange={e => setEmail(e.target.value)} disabled={isLoading} />
-                        </div>
-                        <div className="grid gap-3">
-                            <div className="flex items-center">
-                                <Label htmlFor="password">Password</Label>
-                                <Link href="#" className="ml-auto inline-block text-sm underline text-muted-foreground hover:text-primary">
-                                    Forgot your password?
-                                </Link>
-                            </div>
-                            <Input id="password" type="password" required value={password} onChange={e => setPassword(e.target.value)} disabled={isLoading} />
-                        </div>
-                        <div className="grid gap-3">
-                            <Button onClick={() => handleAuthAction('signin')} disabled={isLoading} className="w-full">
-                                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Sign In
-                            </Button>
-                             <Button onClick={handleGoogleSignIn} variant="outline" className="w-full" disabled={isLoading}>
-                                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon />}
-                                Sign in with Google
-                            </Button>
-                        </div>
-                    </div>
-
-                    <div className="mt-4 text-center text-sm">
-                        Don&apos;t have an account?{" "}
-                        <button onClick={() => handleAuthAction('register')} className="underline font-semibold text-primary disabled:opacity-50" disabled={isLoading}>
-                            Sign up
-                        </button>
-                    </div>
-                     <p className="text-xs text-muted-foreground text-center px-4 pt-4">
-                        By continuing, you agree to our <Link href="#" className="underline">Terms of Service</Link> and <Link href="#" className="underline">Privacy Policy</Link>.
-                    </p>
+       <div className="relative w-full min-h-screen flex items-center justify-center p-4">
+            <Image
+                src="https://picsum.photos/seed/lexease-login-bg/1920/1080"
+                alt="Background"
+                fill
+                className="object-cover -z-10"
+                data-ai-hint="abstract legal background"
+                priority
+            />
+            <div className="w-full max-w-md mx-auto bg-card/60 dark:bg-card/40 backdrop-blur-lg border border-border/20 shadow-2xl rounded-2xl p-8 animate-fade-in-up">
+                <div className="text-center mb-8">
+                     <h2 className="text-2xl font-bold text-primary mb-4">Project By Team CryptoCrew : GenaAi Exchange Hackathon 2025</h2>
+                     <h1 className="text-4xl font-bold text-primary mb-2 font-headline">LexEase</h1>
+                     <p className="text-muted-foreground">Enter your details below to access your legal co-pilot.</p>
                 </div>
-            </div>
-            <div className="hidden bg-muted lg:block">
-                <Image
-                    src="https://picsum.photos/seed/lexease-login/1200/1800"
-                    alt="Image"
-                    width="1200"
-                    height="1800"
-                    className="h-full w-full object-cover"
-                    data-ai-hint="modern courthouse interior"
-                    priority
-                />
+                
+                <div className="grid gap-6">
+                    <div className="grid gap-3">
+                        <Label htmlFor="email">Email</Label>
+                        <Input id="email" type="email" placeholder="m@example.com" required value={email} onChange={e => setEmail(e.target.value)} disabled={isLoading} />
+                    </div>
+                    <div className="grid gap-3">
+                        <div className="flex items-center">
+                            <Label htmlFor="password">Password</Label>
+                            <Link href="#" className="ml-auto inline-block text-sm underline text-muted-foreground hover:text-primary">
+                                Forgot your password?
+                            </Link>
+                        </div>
+                        <Input id="password" type="password" required value={password} onChange={e => setPassword(e.target.value)} disabled={isLoading} />
+                    </div>
+                    <div className="grid gap-3">
+                        <Button onClick={() => handleAuthAction('signin')} disabled={isLoading} className="w-full">
+                            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Sign In
+                        </Button>
+                         <Button onClick={handleGoogleSignIn} variant="outline" className="w-full" disabled={isLoading}>
+                            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon />}
+                            Sign in with Google
+                        </Button>
+                    </div>
+                </div>
+
+                <div className="mt-6 text-center text-sm">
+                    Don&apos;t have an account?{" "}
+                    <button onClick={() => handleAuthAction('register')} className="underline font-semibold text-primary disabled:opacity-50" disabled={isLoading}>
+                        Sign up
+                    </button>
+                </div>
+                 <p className="text-xs text-muted-foreground text-center px-4 pt-6">
+                    By continuing, you agree to our <Link href="#" className="underline">Terms of Service</Link> and <Link href="#" className="underline">Privacy Policy</Link>.
+                </p>
             </div>
         </div>
     );

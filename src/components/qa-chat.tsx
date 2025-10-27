@@ -69,7 +69,7 @@ export default function QAChat({ documentText, documentId }: QAChatProps) {
               title: "Database Indexing",
               description: "The database is being set up. Chat history may not be available yet. Please wait a moment."
           });
-      } else {
+      } else if (db) {
            toast({
               variant: "destructive",
               title: "Error",
