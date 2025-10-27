@@ -3,13 +3,17 @@
 
 import React, { useContext, useState, useEffect } from "react";
 import { onAuthStateChanged, type User } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { auth, app } from "@/lib/firebase"; // Import app as well
 import { Loader2 } from "lucide-react";
+import { getApps, initializeApp } from "firebase/app";
+import { firebaseConfig } from "@/lib/firebase";
 
 interface AuthContextType {
   currentUser: User | null;
   userLoggedIn: boolean;
   loading: boolean;
+  isEmailUser: boolean;
+  isGoogleUser: boolean;
 }
 
 const AuthContext = React.createContext<AuthContextType | undefined>(undefined);
@@ -25,26 +29,47 @@ export function useAuth() {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [userLoggedIn, setUserLoggedIn] = useState(false);
+  const [isEmailUser, setIsEmailUser] = useState(false);
+  const [isGoogleUser, setIsGoogleUser] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Ensure Firebase is initialized
+    if (getApps().length === 0) {
+      initializeApp(firebaseConfig);
+    }
     const unsubscribe = onAuthStateChanged(auth, initializeUser);
     return unsubscribe;
   }, []);
 
   async function initializeUser(user: User | null) {
     if (user) {
-      setCurrentUser(user);
+      setCurrentUser({ ...user });
+
+      const isEmail = user.providerData.some(
+        (provider) => provider.providerId === "password"
+      );
+      setIsEmailUser(isEmail);
+
+      const isGoogle = user.providerData.some(
+        (provider) => provider.providerId === "google.com"
+      );
+      setIsGoogleUser(isGoogle);
+
       setUserLoggedIn(true);
     } else {
       setCurrentUser(null);
       setUserLoggedIn(false);
+      setIsEmailUser(false);
+      setIsGoogleUser(false);
     }
     setLoading(false);
   }
 
   const value = {
     userLoggedIn,
+    isEmailUser,
+    isGoogleUser,
     currentUser,
     loading,
   };
@@ -62,5 +87,3 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 }
 
 export default AuthProvider;
-
-    

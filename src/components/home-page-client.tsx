@@ -16,8 +16,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { getAuth, signOut } from "firebase/auth";
-import { app } from "@/lib/firebase";
 import { useAuth } from "@/components/auth-provider";
+import { app } from "@/lib/firebase";
 
 
 const features = [
@@ -116,7 +116,7 @@ export default function HomePageClient() {
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                             <Avatar className="h-8 w-8">
-                                <AvatarImage src={currentUser.isAnonymous ? '' : currentUser.photoURL ?? ''} alt={currentUser.displayName ?? 'User'} />
+                                <AvatarImage src={currentUser.photoURL ?? ''} alt={currentUser.displayName ?? 'User'} />
                                 <AvatarFallback>
                                     <User />
                                 </AvatarFallback>
@@ -126,16 +126,16 @@ export default function HomePageClient() {
                     <DropdownMenuContent className="w-56" align="end" forceMount>
                         <DropdownMenuLabel className="font-normal">
                         <div className="flex flex-col space-y-1">
-                            <p className="text-sm font-medium leading-none">{currentUser.isAnonymous ? "Guest" : currentUser.displayName || "User"}</p>
+                            <p className="text-sm font-medium leading-none">{currentUser.displayName || "User"}</p>
                             <p className="text-xs leading-none text-muted-foreground">
-                            {currentUser.isAnonymous ? "Anonymous Session" : currentUser.email || "No email"}
+                            {currentUser.email || "No email"}
                             </p>
                         </div>
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={handleSignOut}>
                             <LogOut className="mr-2 h-4 w-4" />
-                            <span>End Session</span>
+                            <span>Log Out</span>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -203,7 +203,7 @@ export default function HomePageClient() {
             </div>
              <div className="text-center mt-12 animate-fade-in-up" style={{ animationDelay: '700ms' }}>
                 <Button asChild size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 transition-transform transform hover:scale-105">
-                    <Link href="/new">
+                    <Link href="/login">
                       Analyze a Document
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Link>

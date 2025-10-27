@@ -65,7 +65,7 @@ export default function LoginPage() {
                 description: "Welcome back to LexEase!",
             });
             router.push("/");
-        } catch (error: any) => {
+        } catch (error: any) {
             console.error("Google sign-in error:", error);
             toast({
                 variant: "destructive",
@@ -125,5 +125,3 @@ export default function LoginPage() {
         </div>
     );
 }
-
-    
