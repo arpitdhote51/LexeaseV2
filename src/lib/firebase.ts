@@ -8,7 +8,6 @@ let auth: Auth;
 let db: Firestore;
 let analytics: Analytics | undefined = undefined;
 
-// Hardcode the configuration for reliability on the client-side
 const firebaseConfig = {
     apiKey: "AIzaSyDcFJTJnGLI-uVStqI8uuQVcQMY34ilMJg",
     authDomain: "studio-7376954909-7abc4.firebaseapp.com",
@@ -19,41 +18,33 @@ const firebaseConfig = {
     measurementId: "G-9T325DLBHR"
 };
 
-// Initialize Firebase on the client side
-if (typeof window !== 'undefined') {
-    if (!getApps().length) {
-        app = initializeApp(firebaseConfig);
-    } else {
-        app = getApp();
-    }
-    
-    auth = getAuth(app);
-    
-    try {
-        db = initializeFirestore(app, {
-            localCache: persistentLocalCache({})
-        });
-    } catch (e) {
-        db = getFirestore(app);
-    }
-    
-    if (firebaseConfig.measurementId) {
-        try {
-            analytics = getAnalytics(app);
-        } catch(e) {
-            console.error("Failed to initialize Analytics", e);
+function initializeFirebase() {
+    if (typeof window !== 'undefined') {
+        if (!getApps().length) {
+            app = initializeApp(firebaseConfig);
+            try {
+                db = initializeFirestore(app, {
+                    localCache: persistentLocalCache({})
+                });
+            } catch (e) {
+                console.warn("Could not initialize persistent cache. Falling back to in-memory cache.", e);
+                db = getFirestore(app);
+            }
+            if (firebaseConfig.measurementId) {
+                try {
+                    analytics = getAnalytics(app);
+                } catch(e) {
+                    console.error("Failed to initialize Analytics", e);
+                }
+            }
+        } else {
+            app = getApp();
+            db = getFirestore(app);
         }
+        auth = getAuth(app);
     }
-} else {
-    // Handle server-side initialization if necessary, though this app is client-focused
-    if (!getApps().length) {
-         app = initializeApp(firebaseConfig);
-    } else {
-        app = getApp();
-    }
-    auth = getAuth(app);
-    db = getFirestore(app);
 }
 
-// Export the initialized instances
+initializeFirebase();
+
 export { app, auth, db, analytics };

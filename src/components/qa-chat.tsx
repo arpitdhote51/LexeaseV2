@@ -47,32 +47,38 @@ export default function QAChat({ documentText, documentId }: QAChatProps) {
   }, []);
 
   useEffect(() => {
-    // With auth disabled, documentId will be 'temp-id' and we don't fetch history.
-    // If you re-enable auth, this will work for persisted documents.
-    if (!documentId || documentId === 'temp-id') return;
+    if (!documentId || documentId === 'temp-id' || !db) return;
 
-    // const messagesCol = collection(db, "documents", documentId, "messages");
-    // const q = query(messagesCol, orderBy("timestamp", "asc"));
+    const messagesCol = collection(db, "documents", documentId, "messages");
+    const q = query(messagesCol, orderBy("timestamp", "asc"));
     
-    // const unsubscribe = onSnapshot(q, (querySnapshot) => {
-    //   const history: Message[] = [];
-    //    querySnapshot.forEach((doc) => {
-    //      history.push({ id: doc.id, ...doc.data() } as Message);
-    //    });
-    //   setMessages(history);
-    //   scrollToBottom();
-    // }, (error) => {
-    //   console.error("Error fetching chat history: ", error);
-    //   if (error.code !== 'failed-precondition') {
-    //       toast({
-    //           variant: "destructive",
-    //           title: "Error",
-    //           description: "Could not load chat history."
-    //       });
-    //   }
-    // });
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const history: Message[] = [];
+       querySnapshot.forEach((doc) => {
+         history.push({ id: doc.id, ...doc.data() } as Message);
+       });
+      setMessages(history);
+      scrollToBottom();
+    }, (error) => {
+      console.error("Error fetching chat history: ", error);
+      // Firestore throws 'failed-precondition' if indexes are being built.
+      // This is a transient state in development, so we can inform the user.
+      if (error.code === 'failed-precondition') {
+          toast({
+              variant: "destructive",
+              title: "Database Indexing",
+              description: "The database is being set up. Chat history may not be available yet. Please wait a moment."
+          });
+      } else {
+           toast({
+              variant: "destructive",
+              title: "Error",
+              description: "Could not load chat history."
+          });
+      }
+    });
 
-    // return () => unsubscribe();
+    return () => unsubscribe();
   }, [documentId, scrollToBottom, toast]);
 
 
@@ -131,22 +137,56 @@ export default function QAChat({ documentText, documentId }: QAChatProps) {
     const currentInput = input;
     if (!currentInput.trim() || isLoading) return;
 
-    const userMessage: Message = { role: "user", content: currentInput };
+    const userMessage: Message = { 
+        role: "user", 
+        content: currentInput, 
+        timestamp: serverTimestamp() 
+    };
+
+    // Optimistically update the UI
     setMessages(prev => [...prev, userMessage]);
-    
     setInput("");
+    
+    // Save user message to Firestore if not a temp document
+    if (documentId !== 'temp-id' && db) {
+        try {
+            await addDoc(collection(db, "documents", documentId, "messages"), userMessage);
+        } catch (error) {
+             console.error("Error saving user message:", error);
+             toast({
+                variant: "destructive",
+                title: "Message Error",
+                description: "Could not save your message."
+             });
+             // Optionally, revert the optimistic update
+             setMessages(prev => prev.slice(0, -1));
+             return; // Stop if message can't be saved
+        }
+    }
+    
     setIsLoading(true);
 
     try {
         const qaInput: InteractiveQAInput = { documentText, question: currentInput };
         const result = await interactiveQA(qaInput);
-        const assistantMessage: Message = { role: "assistant", content: result.answer };
+        const assistantMessage: Message = { 
+            role: "assistant", 
+            content: result.answer,
+            timestamp: serverTimestamp()
+        };
+
+        // Optimistically update UI for assistant message
         setMessages(prev => [...prev, assistantMessage]);
+
+        // Save assistant message to Firestore
+        if (documentId !== 'temp-id' && db) {
+            await addDoc(collection(db, "documents", documentId, "messages"), assistantMessage);
+        }
 
     } catch (error) {
         console.error("Q&A failed:", error);
         toast({ variant: "destructive", title: "Error", description: "Could not get an answer. Please try again." });
-        setMessages(prev => prev.slice(0, -1)); // Remove user message on error
+        setMessages(prev => prev.slice(0, -1)); // Revert only the assistant's failed response
     } finally {
         setIsLoading(false);
     }
@@ -160,6 +200,11 @@ export default function QAChat({ documentText, documentId }: QAChatProps) {
       <CardContent className="flex-1 flex flex-col gap-4 overflow-hidden">
         <ScrollArea className="flex-1 pr-4 -mr-4" ref={scrollAreaRef}>
           <div className="space-y-4">
+            {messages.length === 0 && (
+                <div className="text-center text-muted-foreground pt-10">
+                    <p>Ask a question about your document to get started.</p>
+                </div>
+            )}
             {messages.map((message, index) => (
               <div
                 key={message.id || `msg-${index}`}

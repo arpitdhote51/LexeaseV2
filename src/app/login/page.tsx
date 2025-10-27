@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, User } from "firebase/auth";
-import { app } from "@/lib/firebase";
+import { getFirebase } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
@@ -22,18 +22,17 @@ const GoogleIcon = () => (
 
 
 export default function LoginPage() {
-    const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
     const { toast } = useToast();
-    const auth = getAuth(app);
+    const { auth } = getFirebase();
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-            setUser(currentUser);
-            setLoading(false);
             if (currentUser) {
                 router.replace("/");
+            } else {
+                setLoading(false);
             }
         });
         return () => unsubscribe();
@@ -58,7 +57,7 @@ export default function LoginPage() {
         }
     };
 
-    if (loading || user) {
+    if (loading) {
         return (
             <div className="flex h-screen w-full items-center justify-center bg-background">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
