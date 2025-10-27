@@ -2,7 +2,7 @@
 'use server';
 
 /**
- * @fileOverview This file defines a Genkit flow for providing strategic advice on a legal document.
+ * @fileOverview This file defines a Genkit flow for providing strategic advice on a legal document from both defendant and prosecutor perspectives.
  *
  * It includes:
  * - `strategicAdvisorAgent`: The main function to trigger the flow.
@@ -25,10 +25,16 @@ const CriticalPointSchema = z.object({
     strategy: z.string().describe("How to effectively argue or leverage this point."),
 });
 
+const AdviceSchema = z.object({
+    caseStrengthScore: z.number().min(1).max(10).describe("An integer score from 1 (very weak) to 10 (very strong) assessing the overall strength of this party's position."),
+    caseStrengthReasoning: z.string().describe("A concise justification for the provided case strength score, highlighting key factors for this party."),
+    criticalPoints: z.array(CriticalPointSchema).describe("A list of the most critical points, arguments, or clauses for this party.")
+});
+
+
 const StrategicAdvisorAgentOutputSchema = z.object({
-  caseStrengthScore: z.number().min(1).max(10).describe("An integer score from 1 (very weak) to 10 (very strong) assessing the overall strength of the position presented in the document."),
-  caseStrengthReasoning: z.string().describe("A concise justification for the provided case strength score, highlighting key factors."),
-  criticalPoints: z.array(CriticalPointSchema).describe("A list of the most critical points, arguments, or clauses identified in the document.")
+  defendantAdvice: AdviceSchema.describe("Strategic advice tailored for the defendant/accused party based on the document."),
+  prosecutorAdvice: AdviceSchema.describe("Strategic advice tailored for the prosecutor/victim/plaintiff party based on the document."),
 });
 export type StrategicAdvisorAgentOutput = z.infer<typeof StrategicAdvisorAgentOutputSchema>;
 
@@ -42,18 +48,19 @@ const strategicAdvisorAgentPrompt = ai.definePrompt({
   name: 'strategicAdvisorAgentPrompt',
   input: { schema: StrategicAdvisorAgentInputSchema },
   output: { schema: StrategicAdvisorAgentOutputSchema },
-  prompt: `You are an AI assistant role-playing as a senior legal strategist.
-  Your task is to analyze the provided legal document and offer a high-level strategic assessment.
+  prompt: `You are an AI assistant role-playing as two opposing senior legal strategists analyzing a single legal document.
+  Your task is to provide two separate and distinct high-level strategic assessments: one for the defendant/accused, and one for the prosecutor/victim/plaintiff.
   The entire response must be in the requested language: {{{language}}}.
 
-  1.  **Assess Case Strength**: Read the entire document and evaluate the strength of the legal position presented. Provide a numerical score from 1 (very weak) to 10 (very strong).
-  2.  **Justify the Score**: Briefly explain the reasoning behind your score. Mention the key factors that influenced your decision, such as the quality of evidence cited, the clarity of the arguments, or potential legal vulnerabilities.
-  3.  **Identify Critical Points**: Extract the most critical points, arguments, or clauses from the document. For each point, explain why it is important and suggest a strategic approach for how to argue or leverage it effectively.
+  For EACH party (Defendant and Prosecutor), you must provide:
+  1.  **Assess Case Strength**: Read the entire document and evaluate the strength of that party's legal position. Provide a numerical score from 1 (very weak) to 10 (very strong).
+  2.  **Justify the Score**: Briefly explain the reasoning behind your score for that party. Mention key factors like evidence, arguments, or vulnerabilities from their perspective.
+  3.  **Identify Critical Points**: Extract the most critical points, arguments, or clauses that party should focus on. For each point, explain its importance and suggest a strategy for how they should argue or leverage it effectively.
 
   Document:
   {{{documentText}}}
 
-  Please provide the output in the structured JSON format.
+  Please provide the complete output in the structured JSON format, with separate objects for 'defendantAdvice' and 'prosecutorAdvice'.
 `,
 });
 

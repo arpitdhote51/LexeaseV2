@@ -215,7 +215,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
         yPos += 8;
         doc.setLineWidth(0.5);
         doc.setDrawColor(200);
-        doc.line(15, yPos, 195, yPos);
+        doc.line(15, 195, yPos, yPos);
         yPos += 10;
         body();
     };
@@ -229,23 +229,23 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
         yPos += summaryLines.length * 5 + 10;
     });
 
-    // 2. Strategic Advice
-    addSection("Strategic Advisor", () => {
+    // 2. Strategic Advisor - Defendant
+    addSection("Strategic Advisor: Defendant/Accused", () => {
         doc.setFontSize(12);
         doc.setTextColor(40, 40, 40);
-        doc.text(`Case Strength Score: ${strategicAdvice.caseStrengthScore}/10`, 15, yPos);
+        doc.text(`Case Strength Score: ${strategicAdvice.defendantAdvice.caseStrengthScore}/10`, 15, yPos);
         yPos += 8;
         
         doc.setFontSize(11);
         doc.setTextColor(80);
-        const reasoningLines = doc.splitTextToSize(`Reasoning: ${strategicAdvice.caseStrengthReasoning}`, 180);
+        const reasoningLines = doc.splitTextToSize(`Reasoning: ${strategicAdvice.defendantAdvice.caseStrengthReasoning}`, 180);
         doc.text(reasoningLines, 15, yPos);
         yPos += reasoningLines.length * 5 + 5;
 
         (doc as any).autoTable({
             startY: yPos,
             head: [['Critical Point', 'Importance', 'Strategy']],
-            body: strategicAdvice.criticalPoints.map(p => [p.point, p.importance, p.strategy]),
+            body: strategicAdvice.defendantAdvice.criticalPoints.map(p => [p.point, p.importance, p.strategy]),
             theme: 'grid',
             headStyles: { fillColor: [43, 108, 176] },
             didDrawPage: (data: any) => { yPos = data.cursor.y + 10; }
@@ -253,7 +253,32 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
         yPos = (doc as any).lastAutoTable.finalY + 10;
     });
 
-    // 3. Key Entities
+    // 3. Strategic Advisor - Prosecutor
+    addSection("Strategic Advisor: Prosecutor/Victim", () => {
+        doc.setFontSize(12);
+        doc.setTextColor(40, 40, 40);
+        doc.text(`Case Strength Score: ${strategicAdvice.prosecutorAdvice.caseStrengthScore}/10`, 15, yPos);
+        yPos += 8;
+        
+        doc.setFontSize(11);
+        doc.setTextColor(80);
+        const reasoningLines = doc.splitTextToSize(`Reasoning: ${strategicAdvice.prosecutorAdvice.caseStrengthReasoning}`, 180);
+        doc.text(reasoningLines, 15, yPos);
+        yPos += reasoningLines.length * 5 + 5;
+
+        (doc as any).autoTable({
+            startY: yPos,
+            head: [['Critical Point', 'Importance', 'Strategy']],
+            body: strategicAdvice.prosecutorAdvice.criticalPoints.map(p => [p.point, p.importance, p.strategy]),
+            theme: 'grid',
+            headStyles: { fillColor: [43, 108, 176] },
+            didDrawPage: (data: any) => { yPos = data.cursor.y + 10; }
+        });
+        yPos = (doc as any).lastAutoTable.finalY + 10;
+    });
+
+
+    // 4. Key Entities
     addSection("Key Entities", () => {
         const grouped = entities.entities.reduce((acc, entity) => {
             const type = entity.type || 'Uncategorized';
@@ -282,7 +307,7 @@ export default function LexeaseApp({ existingDocument }: LexeaseAppProps) {
         yPos += 5;
     });
 
-    // 4. Risk Flags
+    // 5. Risk Flags
     addSection("Risk Flags", () => {
         doc.setFontSize(11);
         doc.setTextColor(220, 53, 69); // destructive color
