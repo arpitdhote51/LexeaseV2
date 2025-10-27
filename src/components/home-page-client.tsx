@@ -162,7 +162,7 @@ export default function HomePageClient() {
             </div>
             <div className="w-full max-w-4xl mt-10 h-[500px]">
               <Suspense fallback={<div className="w-full h-full bg-card/50 shadow-lg rounded-2xl border border-border/50 backdrop-blur-sm animate-pulse" />}>
-                <LexyChat />
+                <LexyChat glassmorphism />
               </Suspense>
             </div>
           </div>

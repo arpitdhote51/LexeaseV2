@@ -17,7 +17,11 @@ interface Message {
   content: string;
 }
 
-export default function LexyChat() {
+interface LexyChatProps {
+    glassmorphism?: boolean;
+}
+
+export default function LexyChat({ glassmorphism = false }: LexyChatProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -143,8 +147,13 @@ export default function LexyChat() {
     recognitionRef.current = recognition;
   };
 
+  const chatContainerClasses = glassmorphism 
+    ? "bg-white/10 dark:bg-black/10 backdrop-blur-lg border border-white/20 dark:border-black/20" 
+    : "bg-card border-border/50";
+
+
   return (
-    <div className={`w-full flex flex-col bg-card shadow-lg rounded-2xl border border-border/50 backdrop-blur-sm h-full`}>
+    <div className={`w-full flex flex-col shadow-lg rounded-2xl h-full ${chatContainerClasses}`}>
         <ScrollArea className="flex-1 p-6" ref={scrollAreaRef}>
           <div className="space-y-6">
             {messages.map((message) => (
